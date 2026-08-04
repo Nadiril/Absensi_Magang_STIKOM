@@ -1,0 +1,174 @@
+<!DOCTYPE html><html lang="id" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title class="">Add New Student - Magangku</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#63dca6",
+                        "secondary-fixed": "#e1e2e4",
+                        "inverse-surface": "#2a313d",
+                        "outline-variant": "#c3c5d7",
+                        "inverse-on-surface": "#ebf1ff",
+                        "surface-bright": "#f9f9ff",
+                        "surface-container-highest": "#dce2f3",
+                        "on-primary-container": "#d4dcff",
+                        "background": "#f9f9ff",
+                        "tertiary-fixed": "#81f9c1",
+                        "on-surface": "#151c27",
+                        "secondary": "#5c5f60",
+                        "tertiary-container": "#006f4b",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed": "#191c1e",
+                        "on-error-container": "#93000a",
+                        "surface-container-low": "#f0f3ff",
+                        "on-primary-fixed-variant": "#003dab",
+                        "surface": "#f9f9ff",
+                        "on-error": "#ffffff",
+                        "tertiary": "#005438",
+                        "surface-container": "#e7eefe",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "on-background": "#151c27",
+                        "surface-tint": "#1353d8",
+                        "on-secondary-container": "#606365",
+                        "surface-container-lowest": "#ffffff",
+                        "primary": "#003fb1",
+                        "on-tertiary-container": "#7af3bb",
+                        "surface-dim": "#d3daea",
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#dee0e2",
+                        "surface-variant": "#dce2f3",
+                        "on-surface-variant": "#434654",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-primary-fixed": "#00174d",
+                        "surface-container-high": "#e2e8f8",
+                        "outline": "#737686",
+                        "on-secondary-fixed-variant": "#444749",
+                        "primary-container": "#1a56db",
+                        "primary-fixed-dim": "#b5c4ff",
+                        "primary-fixed": "#dbe1ff",
+                        "on-secondary": "#ffffff",
+                        "inverse-primary": "#b5c4ff",
+                        "on-tertiary-fixed": "#002113",
+                        "secondary-fixed-dim": "#c5c6c8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-padding": "20px",
+                        "stack-md": "16px",
+                        "gutter": "12px",
+                        "stack-sm": "8px",
+                        "stack-lg": "24px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "interactive": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "interactive": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.background'); }
+        /* Custom styles for select bottom sheet logic could go here */
+    </style>
+</head>
+<body class="antialiased text-on-background font-body-md min-h-screen pb-safe pb-24 md:pb-8">
+<!-- Header / App Bar -->
+<header class="bg-surface dark:bg-surface w-full h-16 flex items-center px-container-padding sticky top-0 z-40 justify-start">
+<button class="p-2 -ml-2 rounded-full hover:bg-surface-container-low transition-colors duration-200 text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex flex-col ml-2">
+    <span class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Magangku</span>
+    <h1 class="font-headline-md text-headline-md-mobile md:text-headline-md text-primary dark:text-primary-fixed-dim">
+        Add Student
+    </h1>
+</div>
+ <!-- Spacer for centering -->
+</header>
+<!-- Main Content Canvas -->
+<main class="px-container-padding pt-stack-lg max-w-2xl mx-auto">
+<form class="space-y-stack-lg pb-stack-lg">
+<div class="bg-surface-lowest border border-outline-variant/30 rounded-xl p-stack-md space-y-stack-md shadow-sm">
+<h2 class="font-interactive text-interactive text-on-surface border-b border-surface-variant pb-stack-sm mb-stack-md">Personal Information</h2>
+<!-- NIS Input -->
+<div class="flex flex-col gap-base">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider" for="nis">NIS</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-gutter py-3 font-body-lg text-body-lg text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none placeholder:text-outline-variant" id="nis" name="nis" placeholder="e.g. 12345678" type="number">
+</div>
+<!-- Nama Lengkap Input -->
+<div class="flex flex-col gap-base">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider" for="nama">Nama Lengkap</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-gutter py-3 font-body-lg text-body-lg text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none placeholder:text-outline-variant" id="nama" name="nama" placeholder="Full legal name" type="text">
+</div>
+</div>
+<div class="bg-surface-lowest border border-outline-variant/30 rounded-xl p-stack-md space-y-stack-md shadow-sm">
+<h2 class="font-interactive text-interactive text-on-surface border-b border-surface-variant pb-stack-sm mb-stack-md">Academic &amp; Contact</h2>
+<!-- Sekolah Asal (Searchable Dropdown Mock) -->
+<div class="flex flex-col gap-base relative">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider" for="sekolah">Sekolah Asal</label>
+<div class="relative cursor-pointer">
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-gutter py-3 font-body-lg text-body-lg text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none placeholder:text-outline-variant pr-10" id="sekolah" name="sekolah" placeholder="Search school name..." type="text">
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+</div>
+</div>
+<!-- Domisili Textarea -->
+<div class="flex flex-col gap-base">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider" for="domisili">Domisili (Alamat)</label>
+<textarea class="w-full bg-surface-bright border border-outline-variant rounded-lg px-gutter py-3 font-body-lg text-body-lg text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none placeholder:text-outline-variant resize-none" id="domisili" name="domisili" placeholder="Current residential address" rows="3"></textarea>
+</div>
+<!-- Phone Numbers Flex Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+<div class="flex flex-col gap-base">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider" for="hp_siswa">Nomor HP Siswa</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-gutter py-3 font-body-lg text-body-lg text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none placeholder:text-outline-variant" id="hp_siswa" name="hp_siswa" placeholder="+62 8..." type="tel">
+</div>
+<div class="flex flex-col gap-base">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider" for="hp_wali">Nomor HP Wali</label>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg px-gutter py-3 font-body-lg text-body-lg text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none placeholder:text-outline-variant" id="hp_wali" name="hp_wali" placeholder="+62 8..." type="tel">
+</div>
+</div>
+</div>
+<!-- Submit Button Area -->
+<div class="pt-stack-sm flex flex-col sm:flex-row gap-stack-md sm:justify-end">
+<button class="px-6 py-3 rounded-lg bg-surface-container-highest text-on-surface-variant font-interactive text-interactive hover:bg-outline-variant transition-colors text-center" type="button">
+                    Cancel
+                </button>
+<button class="px-6 py-3 rounded-lg bg-primary text-on-primary font-interactive text-interactive shadow-md hover:bg-primary-container hover:text-on-primary-container transition-colors text-center flex items-center justify-center gap-2" type="submit">
+<span class="material-symbols-outlined" data-icon="save">save</span>
+                    Save Student Record
+                </button>
+</div>
+</form>
+</main>
+<!-- Suppressed Bottom Nav / FAB because this is a transactional form screen per rules -->
+
+
+</body></html>

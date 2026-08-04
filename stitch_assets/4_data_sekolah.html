@@ -1,0 +1,361 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title text="School Registry - Magangku" class="">School Registry - EduPulse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#63dca6",
+                        "secondary-fixed": "#e1e2e4",
+                        "inverse-surface": "#2a313d",
+                        "outline-variant": "#c3c5d7",
+                        "inverse-on-surface": "#ebf1ff",
+                        "surface-bright": "#f9f9ff",
+                        "surface-container-highest": "#dce2f3",
+                        "on-primary-container": "#d4dcff",
+                        "background": "#f9f9ff",
+                        "tertiary-fixed": "#81f9c1",
+                        "on-surface": "#151c27",
+                        "secondary": "#5c5f60",
+                        "tertiary-container": "#006f4b",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed": "#191c1e",
+                        "on-error-container": "#93000a",
+                        "surface-container-low": "#f0f3ff",
+                        "on-primary-fixed-variant": "#003dab",
+                        "surface": "#f9f9ff",
+                        "on-error": "#ffffff",
+                        "tertiary": "#005438",
+                        "surface-container": "#e7eefe",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "on-background": "#151c27",
+                        "surface-tint": "#1353d8",
+                        "on-secondary-container": "#606365",
+                        "surface-container-lowest": "#ffffff",
+                        "primary": "#003fb1",
+                        "on-tertiary-container": "#7af3bb",
+                        "surface-dim": "#d3daea",
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#dee0e2",
+                        "surface-variant": "#dce2f3",
+                        "on-surface-variant": "#434654",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-primary-fixed": "#00174d",
+                        "surface-container-high": "#e2e8f8",
+                        "outline": "#737686",
+                        "on-secondary-fixed-variant": "#444749",
+                        "primary-container": "#1a56db",
+                        "primary-fixed-dim": "#b5c4ff",
+                        "primary-fixed": "#dbe1ff",
+                        "on-secondary": "#ffffff",
+                        "inverse-primary": "#b5c4ff",
+                        "on-tertiary-fixed": "#002113",
+                        "secondary-fixed-dim": "#c5c6c8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-padding": "20px",
+                        "stack-md": "16px",
+                        "gutter": "12px",
+                        "stack-sm": "8px",
+                        "stack-lg": "24px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "interactive": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "interactive": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Smooth fade transition for toast */
+        .toast-enter {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        .toast-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 300ms, transform 300ms;
+        }
+        .toast-exit {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast-exit-active {
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 300ms, transform 300ms;
+        }
+    </style>
+<style>
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        </style></head>
+<body class="min-h-screen pb-24 md:pb-0 md:pl-80 flex flex-col md:flex-row font-body-md">
+<!-- Mobile Top App Bar -->
+<header class="md:hidden w-full h-16 bg-surface dark:bg-surface flex items-center px-container-padding sticky top-0 z-40 gap-4">
+
+<h1 class="font-headline-md text-headline-md text-primary">Magangku</h1>
+<div class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant flex items-center justify-center ml-auto">
+<span class="material-symbols-outlined text-secondary" data-icon="person">person</span>
+</div>
+</header>
+<!-- Desktop Navigation Drawer -->
+<aside class="hidden md:flex fixed left-0 top-0 z-[60] h-full w-80 flex-col p-stack-lg bg-surface shadow-lg">
+<div class="flex items-center gap-4 mb-8 pb-6 border-b border-surface-container-high">
+<div class="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden">
+<img alt="Administrator Avatar" class="w-full h-full object-cover" data-alt="A professional headshot avatar of an academic administrator. Clean, modern, light background, minimalist style, corporate yet approachable. Soft lighting, high quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVcBHMuQaGaf34jrlUIkkuhaSY34wS94KCz_JJNiLPxTaRSq2SkIHTCiVBMRcO7t3B0uTxCABtxsQHTvUrpDxg31Gj9xlANlyuTOnXpNq91ukt99hSSu-_DgPrILPiPJ2ospVWZrnyli2ap_sUzyOTMMGDUzUU2X2cdgSDeDwBDhr4T-zEA_sKvg2i69PST4SYItWBITGdz8zSXMvG3tRFJ2LkZLxNBevHGg0H4pszqC-R5ddiUcz4">
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-primary">Academic Admin</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Central High School</p>
+<p class="font-label-sm text-label-sm text-secondary mt-1">Admin ID: 8829</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-interactive text-interactive">Profile</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="font-interactive text-interactive">Attendance</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary font-bold bg-secondary-container transition-all duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined fill" data-icon="domain">domain</span>
+<span class="font-interactive text-interactive">Schools</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span class="font-interactive text-interactive">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-interactive text-interactive">Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-surface-container-high">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-all duration-300 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-interactive text-interactive">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 w-full max-w-6xl mx-auto p-container-padding flex flex-col gap-stack-lg">
+<header class="mb-2">
+<h1 class="font-headline-lg text-headline-lg text-on-background">School Registry</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Manage partner institutions and campuses.</p>
+</header>
+<!-- Success Toast (Hidden by default) -->
+<div class="hidden fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-tertiary-container text-on-tertiary-container px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 transition-opacity duration-300" id="success-toast">
+<span class="material-symbols-outlined fill" data-icon="check_circle">check_circle</span>
+<div>
+<p class="font-interactive text-interactive">School Added Successfully</p>
+<p class="font-body-md text-body-md text-on-tertiary-container opacity-90">Available in student form dropdown.</p>
+</div>
+<button class="ml-4 p-1 hover:bg-tertiary opacity-80 hover:opacity-100 rounded transition-colors" onclick="hideToast()">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-stack-lg">
+<!-- Add School Form Section -->
+<section class="lg:col-span-1 flex flex-col gap-stack-md">
+
+</section>
+<!-- Registered Schools List -->
+<section class="lg:col-span-2 flex flex-col gap-stack-md">
+<div class="flex items-center justify-between mb-2">
+<h2 class="font-headline-md text-headline-md text-on-background">Registered Institutions</h2>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface border border-outline-variant rounded-full font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Search schools..." type="text">
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="school-list">
+<!-- School Card 1 -->
+<div class="bg-surface border border-outline-variant rounded-xl p-5 hover:bg-surface-container-lowest transition-colors flex flex-col gap-3 group">
+<div class="flex justify-between items-start">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="school">school</span>
+</div>
+<span class="px-3 py-1 rounded-full bg-tertiary-container/20 text-tertiary-container font-label-sm text-label-sm border border-tertiary-container/30">Active</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-background line-clamp-1">SMA Negeri 1 Jakarta</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 line-clamp-2">Jl. Budi Utomo No.7, Ps. Baru, Kecamatan Sawah Besar, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta 10710</p>
+</div>
+<div class="mt-auto pt-4 border-t border-surface-container-high flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-secondary">ID: SCH-001</span>
+<button class="p-2 rounded-lg text-primary hover:bg-surface-container-highest transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+</div>
+</div>
+<!-- School Card 2 -->
+<div class="bg-surface border border-outline-variant rounded-xl p-5 hover:bg-surface-container-lowest transition-colors flex flex-col gap-3 group">
+<div class="flex justify-between items-start">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="school">school</span>
+</div>
+<span class="px-3 py-1 rounded-full bg-tertiary-container/20 text-tertiary-container font-label-sm text-label-sm border border-tertiary-container/30">Active</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-background line-clamp-1">SMK Budi Mulia</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 line-clamp-2">Jl. Mangga Besar Raya No.15, Taman Sari, Jakarta Barat</p>
+</div>
+<div class="mt-auto pt-4 border-t border-surface-container-high flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-secondary">ID: SCH-002</span>
+<button class="p-2 rounded-lg text-primary hover:bg-surface-container-highest transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Mobile Bottom Nav Bar -->
+<button class="fixed bottom-24 md:bottom-8 right-container-padding w-14 h-14 bg-primary text-on-primary rounded-xl shadow-lg flex items-center justify-center hover:bg-primary-container hover:text-on-primary-container transition-colors duration-200 z-50">
+<span class="material-symbols-outlined" style="font-size: 28px;">add</span>
+</button><nav class="md:hidden fixed bottom-0 left-0 w-full z-50 h-20 bg-surface-container-lowest border-t border-outline-variant flex justify-around items-center px-4 pb-safe shadow-sm">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high scale-95 active:scale-90 transition-transform duration-150 p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-sm text-label-sm mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high scale-95 active:scale-90 transition-transform duration-150 p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-label-sm text-label-sm mt-1">Students</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-4 py-1 scale-95 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined fill" data-icon="domain">domain</span>
+<span class="font-label-sm text-label-sm mt-1">Schools</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container-high scale-95 active:scale-90 transition-transform duration-150 p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="qr_code_scanner">qr_code_scanner</span>
+<span class="font-label-sm text-label-sm mt-1">Scan</span>
+</a>
+</nav>
+<script>
+        const form = document.getElementById('add-school-form');
+        const toast = document.getElementById('success-toast');
+        const schoolList = document.getElementById('school-list');
+
+        let schoolCount = 2;
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const nama = document.getElementById('nama_instansi').value;
+            const alamat = document.getElementById('alamat').value;
+            
+            // Create new card
+            schoolCount++;
+            const newId = `SCH-${schoolCount.toString().padStart(3, '0')}`;
+            
+            const cardHTML = `
+                <div class="bg-surface border border-outline-variant rounded-xl p-5 hover:bg-surface-container-lowest transition-colors flex flex-col gap-3 group animate-[fadeIn_0.5s_ease-out]">
+                    <div class="flex justify-between items-start">
+                        <div class="w-12 h-12 rounded-lg bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden">
+                            <span class="material-symbols-outlined text-primary text-2xl" data-icon="school">school</span>
+                        </div>
+                        <span class="px-3 py-1 rounded-full bg-tertiary-container/20 text-tertiary-container font-label-sm text-label-sm border border-tertiary-container/30">New</span>
+                    </div>
+                    <div>
+                        <h3 class="font-headline-md text-headline-md text-on-background line-clamp-1">${nama}</h3>
+                        <p class="font-body-md text-body-md text-on-surface-variant mt-1 line-clamp-2">${alamat}</p>
+                    </div>
+                    <div class="mt-auto pt-4 border-t border-surface-container-high flex justify-between items-center">
+                        <span class="font-label-sm text-label-sm text-secondary">ID: ${newId}</span>
+                        <button class="p-2 rounded-lg text-primary hover:bg-surface-container-highest transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
+                            <span class="material-symbols-outlined" data-icon="edit">edit</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            schoolList.insertAdjacentHTML('afterbegin', cardHTML);
+            
+            // Reset form
+            form.reset();
+            
+            // Show toast
+            showToast();
+        });
+
+        let toastTimeout;
+        function showToast() {
+            clearTimeout(toastTimeout);
+            toast.classList.remove('hidden');
+            // Small delay to allow display block to apply before animating opacity
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', '-translate-y-4');
+                toast.classList.add('opacity-100', 'translate-y-0');
+            }, 10);
+            
+            toastTimeout = setTimeout(hideToast, 4000);
+        }
+
+        function hideToast() {
+            toast.classList.remove('opacity-100', 'translate-y-0');
+            toast.classList.add('opacity-0', '-translate-y-4');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 300); // match transition duration
+        }
+        
+        // Add minimal custom animation class
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+
+
+</body></html>
