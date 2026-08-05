@@ -176,4 +176,3 @@ Tabel utama:
 ## 📄 Lisensi
 
 Hak cipta © 2026 **AbsensiMagang**. Proyek ini untuk keperluan internal pengembangan aplikasi presensi magang.
-# Absensi_Magang_STIKOM
