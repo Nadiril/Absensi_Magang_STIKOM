@@ -1,4 +1,4 @@
-## 📝 Riwayat Perubahan (Changelog)
+## 📝 Riwayat Perubahan (Changelog) Absensi Magang 
 
 ### v1.0.0
 
