@@ -1,15 +1,27 @@
-console.log("=== APP STARTED ===");
-
 import React from 'react';
-import { Stack } from 'expo-router';
+import { Stack, Redirect, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { AppProvider } from '../context/AppContext';
-import { Colors } from '../constants/theme';
+import { AppProvider, useApp } from '../context/AppContext';
+import { ThemeProvider, useTheme } from '../context/ThemeContext';
 
-export default function RootLayout() {
+function RootNavigator() {
+  const { Colors, isDark } = useTheme();
+  const { isLoggedIn, isAuthReady } = useApp();
+  const pathname = usePathname();
+
+  if (!isAuthReady) return null;
+
+  const showRedirect =
+    isLoggedIn && pathname === '/login'
+      ? <Redirect href="/(tabs)" />
+      : !isLoggedIn && pathname !== '/login'
+        ? <Redirect href="/login" />
+        : null;
+
   return (
-    <AppProvider>
-      <StatusBar style="dark" />
+    <>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      {showRedirect}
       <Stack
         screenOptions={{
           headerStyle: {
@@ -25,6 +37,8 @@ export default function RootLayout() {
           },
         }}
       >
+        <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="auth-loading" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="tambah-siswa"
@@ -50,6 +64,16 @@ export default function RootLayout() {
           }}
         />
       </Stack>
-    </AppProvider>
+    </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <AppProvider>
+        <RootNavigator />
+      </AppProvider>
+    </ThemeProvider>
   );
 }

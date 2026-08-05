@@ -11,14 +11,17 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Colors, Shadows } from '../constants/theme';
+import { Shadows, ThemeColors } from '../constants/theme';
 import { useApp } from '../context/AppContext';
+import { useTheme } from '../context/ThemeContext';
 import { Toast, ToastData } from '../components/Toast';
 
 export default function StudentDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { students, attendanceRecords, deleteStudent } = useApp();
+  const { Colors } = useTheme();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   const [toast, setToast] = useState<ToastData | null>(null);
   const backTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -189,7 +192,8 @@ export default function StudentDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -281,7 +285,7 @@ const styles = StyleSheet.create({
   rateText: {
     fontSize: 12,
     fontWeight: '600',
-    color: Colors.primary,
+    color: Colors.onPrimaryContainer,
   },
   qrCard: {
     backgroundColor: Colors.surfaceContainerLowest,

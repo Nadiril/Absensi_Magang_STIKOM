@@ -12,6 +12,10 @@ interface AppContextType {
   activities: ActivityLog[];
   isLoading: boolean;
   isSupabaseActive: boolean;
+  isLoggedIn: boolean;
+  isAuthReady: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
   addStudent: (student: Omit<Student, 'id'>) => Promise<void>;
   updateStudent: (id: string, data: Partial<Student>) => Promise<void>;
   deleteStudent: (id: string) => Promise<void>;
@@ -19,6 +23,7 @@ interface AppContextType {
   addSchool: (school: Omit<School, 'id'>) => Promise<void>;
   updateSchool: (id: string, data: Partial<School>) => Promise<void>;
   deleteSchool: (id: string) => Promise<void>;
+  deleteAllSchools: () => Promise<void>;
   recordAttendance: (nisOrId: string) => { success: boolean; message: string; student?: Student };
   clearAllData: () => Promise<void>;
   refreshData: () => Promise<void>;
@@ -33,6 +38,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSupabaseActive, setIsSupabaseActive] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isAuthReady, setIsAuthReady] = useState<boolean>(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem('@magangku_auth')
+      .then((saved) => {
+        if (saved === 'logged-in') setIsLoggedIn(true);
+      })
+      .catch(() => {})
+      .finally(() => setIsAuthReady(true));
+  }, []);
 
   // Load initial data from Supabase or AsyncStorage fallback
   const loadData = useCallback(async () => {
@@ -76,21 +92,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     loadData();
   }, [loadData]);
 
-  // Sync to AsyncStorage if Supabase is not active
+  // Sync to AsyncStorage if Supabase is not active (debounced)
   useEffect(() => {
-    if (!isSupabaseActive) {
+    if (isSupabaseActive) return;
+    const t = setTimeout(() => {
       AsyncStorage.setItem('@magangku_students', JSON.stringify(students)).catch(() => {});
-    }
+    }, 300);
+    return () => clearTimeout(t);
   }, [students, isSupabaseActive]);
 
   useEffect(() => {
-    if (!isSupabaseActive) {
+    if (isSupabaseActive) return;
+    const t = setTimeout(() => {
       AsyncStorage.setItem('@magangku_schools', JSON.stringify(schools)).catch(() => {});
-    }
+    }, 300);
+    return () => clearTimeout(t);
   }, [schools, isSupabaseActive]);
 
   useEffect(() => {
-    AsyncStorage.setItem('@magangku_attendance', JSON.stringify(attendanceRecords)).catch(() => {});
+    const t = setTimeout(() => {
+      AsyncStorage.setItem('@magangku_attendance', JSON.stringify(attendanceRecords)).catch(() => {});
+    }, 300);
+    return () => clearTimeout(t);
   }, [attendanceRecords]);
 
   // CRUD Actions
@@ -284,6 +307,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     [isSupabaseActive]
   );
 
+  const deleteAllSchools = useCallback(async () => {
+    if (isSupabaseActive) {
+      try {
+        await schoolService.deleteAllSchools();
+        setSchools([]);
+        setStudents([]);
+      } catch (err: any) {
+        console.error('Failed to delete all schools from Supabase:', err);
+        throw err;
+      }
+    } else {
+      setSchools([]);
+      setStudents([]);
+    }
+  }, [isSupabaseActive]);
+
   const recordAttendance = useCallback(
     (nisOrId: string) => {
       const target = students.find(
@@ -335,6 +374,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 
   const clearAllData = useCallback(async () => {
+    if (isSupabaseActive) {
+      try {
+        await studentService.deleteAllStudents();
+        await schoolService.deleteAllSchools();
+      } catch (err: any) {
+        console.error('Failed to delete all data from Supabase:', err);
+        throw err;
+      }
+    }
     setStudents([]);
     setSchools([]);
     setAttendanceRecords([]);
@@ -344,11 +392,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {
       console.error('Failed to clear data from storage', e);
     }
-  }, []);
+  }, [isSupabaseActive]);
 
   const refreshData = useCallback(async () => {
     await loadData();
   }, [loadData]);
+
+  const login = useCallback(async (email: string, password: string) => {
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    await AsyncStorage.setItem('@magangku_auth', 'logged-in');
+    setIsLoggedIn(true);
+  }, []);
+
+  const logout = useCallback(async () => {
+    await AsyncStorage.removeItem('@magangku_auth');
+    setIsLoggedIn(false);
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -358,6 +417,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       activities,
       isLoading,
       isSupabaseActive,
+      isLoggedIn,
+      isAuthReady,
+      login,
+      logout,
       addStudent,
       updateStudent,
       deleteStudent,
@@ -365,6 +428,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addSchool,
       updateSchool,
       deleteSchool,
+      deleteAllSchools,
       recordAttendance,
       clearAllData,
       refreshData,
@@ -383,9 +447,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addSchool,
       updateSchool,
       deleteSchool,
+      deleteAllSchools,
       recordAttendance,
       clearAllData,
       refreshData,
+      isLoggedIn,
+      isAuthReady,
+      login,
+      logout,
     ]
   );
 

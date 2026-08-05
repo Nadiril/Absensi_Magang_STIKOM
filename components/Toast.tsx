@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../constants/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '../context/ThemeContext';
 
 export interface ToastData {
   type: 'success' | 'error';
@@ -14,13 +15,15 @@ interface ToastProps {
 }
 
 export const Toast: React.FC<ToastProps> = ({ toast, onHide }) => {
-  const translateY = useRef(new Animated.Value(-120)).current;
+  const { Colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const translateY = useRef(new Animated.Value(-64)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (!toast) return;
 
-    translateY.setValue(-120);
+    translateY.setValue(-64);
     opacity.setValue(0);
     Animated.parallel([
       Animated.spring(translateY, {
@@ -41,7 +44,10 @@ export const Toast: React.FC<ToastProps> = ({ toast, onHide }) => {
   const isSuccess = toast.type === 'success';
 
   return (
-    <View style={styles.wrapper} pointerEvents="none">
+    <View
+      style={[styles.wrapper, { top: insets.top + 10 }]}
+      pointerEvents="none"
+    >
       <Animated.View
         style={[
           styles.toast,
@@ -51,7 +57,7 @@ export const Toast: React.FC<ToastProps> = ({ toast, onHide }) => {
       >
         <Ionicons
           name={isSuccess ? 'checkmark-circle' : 'close-circle'}
-          size={20}
+          size={18}
           color="#ffffff"
         />
         <Text style={styles.message} numberOfLines={2}>
@@ -65,9 +71,8 @@ export const Toast: React.FC<ToastProps> = ({ toast, onHide }) => {
 const styles = StyleSheet.create({
   wrapper: {
     position: 'absolute',
-    top: 12,
-    left: 16,
-    right: 16,
+    left: 0,
+    right: 0,
     alignItems: 'center',
     zIndex: 100,
   },
@@ -75,19 +80,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 14,
-    maxWidth: '100%',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    maxWidth: 440,
+    width: 'auto',
+    marginHorizontal: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
+    shadowOpacity: 0.16,
     shadowRadius: 10,
-    elevation: 8,
+    elevation: 6,
   },
   message: {
     flexShrink: 1,
-    fontSize: 13,
+    fontSize: 12.5,
+    lineHeight: 17,
     fontWeight: '600',
     color: '#ffffff',
   },

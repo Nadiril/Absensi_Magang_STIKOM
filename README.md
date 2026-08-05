@@ -2,7 +2,7 @@
 
 Aplikasi **presensi siswa magang berbasis QR Code** yang dibangun dengan Expo (React Native). Siswa menampilkan kartu QR, admin memindai QR tersebut untuk mencatat kehadiran, serta mengelola data siswa dan sekolah mitra secara lengkap (CRUD).
 
-> ⚠️ **Status: Pengembangan Awal (v1.0.0)** — Fitur masih terus dikembangkan dan disempurnakan.
+> ⚠️ **Status: Pengembangan Awal (v1.2.0)** — Fitur masih terus dikembangkan dan disempurnakan.
 
 ---
 
@@ -15,7 +15,7 @@ Aplikasi **presensi siswa magang berbasis QR Code** yang dibangun dengan Expo (R
 | 🎉 **Modal Sukses Presensi** | Konfirmasi visual setelah scan berhasil (nama, NIS, sekolah, jam) |
 | 👨‍🎓 **Data Siswa (CRUD)** | Tambah, lihat detail + kartu QR, **edit**, hapus, pencarian & filter sekolah |
 | 🏫 **Data Sekolah (CRUD)** | Tambah, **edit**, hapus, pencarian, status sekolah mitra |
-| 📊 **Beranda / Dashboard** | Statistik ringkasan, aktivitas terbaru |
+| 📊 **Beranda / Dashboard** | Statistik persentase kehadiran, grid ringkasan (total presensi, terlambat, siswa aktif), aktivitas terbaru |
 | 🕐 **Riwayat Presensi** | Riwayat kehadiran per siswa |
 | 🔔 **Notifikasi Toast** | Feedback sukses / gagal pada semua aksi simpan & hapus |
 | 📴 **Mode Offline** | Fallback ke `AsyncStorage` saat Supabase tidak dikonfigurasi / offline |
@@ -36,6 +36,7 @@ Aplikasi **presensi siswa magang berbasis QR Code** yang dibangun dengan Expo (R
 | React Native Safe Area Context | `~5.6.0` | ![safe-area](https://img.shields.io/badge/safe--area--context-5.6.0-FFFFFF) |
 | AsyncStorage | `2.2.0` | ![async-storage](https://img.shields.io/badge/AsyncStorage-2.2.0-FFFFFF) |
 | React Native Reanimated | `~4.1.1` | ![reanimated](https://img.shields.io/badge/Reanimated-4.1.1-FFFFFF) |
+| react-native-keyboard-aware-scroll-view | `^0.9.5` | ![keyboard-aware](https://img.shields.io/badge/keyboard--aware--scroll--view-0.9.5-FFFFFF) |
 
 **Backend (Database):** Supabase / PostgreSQL — lihat [Skema Database](#-skema-database)
 
@@ -47,22 +48,24 @@ Aplikasi **presensi siswa magang berbasis QR Code** yang dibangun dengan Expo (R
 AbsensiMagang/
 ├── app/                    # File-based routing (expo-router)
 │   ├── (tabs)/             # Tab navigasi utama
-│   │   ├── index.tsx       #   Beranda / Dashboard
+│   │   ├── index.tsx       #   Beranda / Dashboard (statistik)
 │   │   ├── students.tsx    #   Data Siswa (CRUD)
 │   │   ├── scan.tsx        #   Scanner QR Absensi
 │   │   ├── schools.tsx     #   Data Sekolah (CRUD)
 │   │   └── profile.tsx     #   Profil
 │   ├── _layout.tsx         # Root layout (Stack navigator)
+│   ├── login.tsx           # Halaman login (menampilkan versi aplikasi)
+│   ├── auth-loading.tsx    # Loading transisi autentikasi
 │   ├── tambah-siswa.tsx    # Form tambah / edit siswa
 │   ├── tambah-sekolah.tsx  # Form tambah / edit sekolah
 │   └── student-detail.tsx  # Detail siswa + kartu QR + riwayat
 ├── components/             # Komponen reusable (Toast, Skeleton, dll)
-├── constants/              # Tema (warna, shadow)
-├── context/                # AppContext (state global + CRUD + storage)
+├── constants/              # Tema & palet warna (light / sunset)
+├── context/                # AppContext & ThemeContext (state global + tema)
 ├── services/               # Integrasi Supabase (student & school service)
 ├── lib/                    # Konfigurasi client Supabase
 ├── types/                  # Definisi tipe TypeScript
-├── supabase_schema.sql     # Skema database Supabase
+├── sql/                    # Skema & query database Supabase
 └── app.json                # Konfigurasi aplikasi Expo
 ```
 
@@ -121,7 +124,7 @@ Lalu pilih salah satu opsi di terminal:
 
 ## 🗄️ Skema Database
 
-Jalankan `supabase_schema.sql` di **Supabase Dashboard → SQL Editor**.
+Jalankan `sql/crud_siswa_sekolah.sql` di **Supabase Dashboard → SQL Editor**.
 
 Tabel utama:
 
@@ -140,6 +143,33 @@ Tabel utama:
 - [ ] Autentikasi & manajemen peran (admin / siswa)
 - [ ] Generate kartu QR per siswa (unduh / cetak)
 - [ ] Laporan presensi bulanan (export)
+
+---
+
+## 📝 Riwayat Perubahan (Changelog)
+
+### v1.2.0 — 5 Agustus 2026
+
+- 🔐 **Halaman login premium** — desain ulang Material Design 3: kartu gradien, input full-width dengan label & state focus/error/success, tombol ripple + animasi loading, background blob dekoratif
+- 🔑 **Autentikasi demo** — validasi email & password (min. 6 karakter), "Remember Me" (email tersimpan), tombol "Lupa Password", sesi tersimpan di `AsyncStorage` (`@magangku_auth`)
+- ⏳ **Transisi loading** — `auth-loading.tsx`: skeleton screen saat muat data setelah login sebelum masuk ke tab utama
+- 🧭 **Route guard** — pengalihan otomatis ke halaman login jika belum masuk (`_layout.tsx`)
+- 🍞 **Perbaikan Toast** — posisi & tinggi notifikasi disesuaikan dengan safe-area insets agar tidak terpotong
+- ⚡ **Optimasi performa** — baris list siswa & sekolah di-memoize (`React.memo`), kamera QR otomatis dijeda saat pindah tab, penyimpanan `AsyncStorage` di-debounce, pembersihan log konsol
+- ⌨️ **Perbaikan keyboard login** — `KeyboardAvoidingView` + scroll agar form tidak tertutup keyboard (fix mode edge-to-edge)
+
+### v1.1.0 — 5 Agustus 2026
+
+- 🎨 **Tema disederhanakan** — palet `dark` dihapus; mode tema kini `Auto` / `Terang` / `Senja` (malam otomatis hangat senja, aksen warna lebih kalem)
+- 📊 **Dashboard** — section "Akses Cepat" diganti **Statistik**: persentase kehadiran (progress bar), total presensi, terlambat, siswa aktif & tidak aktif
+- 🧹 **Kartu siswa** — badge kehadiran dihapus agar tampilan lebih bersih
+- ⌨️ **Perbaikan scroll form** — `KeyboardAwareScrollView` + `softwareKeyboardLayoutMode: "resize"` agar field bawah form tetap terlihat & bisa di-scroll saat keyboard muncul (mencegah salah input)
+- 🔤 **Perbaikan kontras** — teks badge kehadiran di halaman detail siswa kini terbaca jelas (`onPrimaryContainer`)
+- ➕ **Dependensi baru** — `react-native-keyboard-aware-scroll-view ^0.9.5`
+
+### v1.0.0
+
+- Rilis awal: scan QR presensi, CRUD siswa & sekolah, riwayat presensi, dashboard, mode offline (AsyncStorage)
 
 ---
 

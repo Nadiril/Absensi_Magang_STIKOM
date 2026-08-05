@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   StyleSheet,
   View,
@@ -13,13 +13,18 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Shadows } from '../../constants/theme';
+import { useFocusEffect } from 'expo-router';
+import { Shadows, ThemeColors } from '../../constants/theme';
 import { useApp } from '../../context/AppContext';
+import { useTheme } from '../../context/ThemeContext';
 import { Student } from '../../types';
 
 export default function ScanScreen() {
   const { recordAttendance } = useApp();
+  const { Colors } = useTheme();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
   const [permission, requestPermission] = useCameraPermissions();
+  const [isFocused, setIsFocused] = useState(true);
   const [manualNis, setManualNis] = useState('');
   const [flashOn, setFlashOn] = useState(false);
   const [scanned, setScanned] = useState(false);
@@ -32,6 +37,13 @@ export default function ScanScreen() {
     student: Student;
     time: string;
   } | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsFocused(true);
+      return () => setIsFocused(false);
+    }, [])
+  );
 
   const handleProcessScan = (inputNis: string) => {
     if (!inputNis.trim()) {
@@ -89,7 +101,7 @@ export default function ScanScreen() {
 
           {/* Center Target Frame with Live CameraView */}
           <View style={styles.viewfinderFrame}>
-            {permission?.granted ? (
+            {permission?.granted && isFocused ? (
               <CameraView
                 style={StyleSheet.absoluteFill}
                 facing="back"
@@ -99,7 +111,7 @@ export default function ScanScreen() {
                 }}
                 onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
               />
-            ) : (
+            ) : isFocused ? (
               <View style={styles.permissionBox}>
                 <Ionicons name="camera-outline" size={42} color="rgba(255,255,255,0.6)" />
                 <Text style={styles.permissionMsg}>Izin kamera diperlukan</Text>
@@ -110,6 +122,11 @@ export default function ScanScreen() {
                 >
                   <Text style={styles.grantBtnText}>Izinkan Kamera</Text>
                 </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.permissionBox}>
+                <Ionicons name="videocam-off-outline" size={42} color="rgba(255,255,255,0.5)" />
+                <Text style={styles.permissionMsg}>Kamera dijeda</Text>
               </View>
             )}
 
@@ -245,7 +262,8 @@ export default function ScanScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,

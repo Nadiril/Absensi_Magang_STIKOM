@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, memo } from 'react';
 import {
   StyleSheet,
   View,
@@ -14,14 +14,56 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Colors, Shadows } from '../../constants/theme';
+import { Shadows, ThemeColors } from '../../constants/theme';
 import { useApp } from '../../context/AppContext';
+import { useTheme } from '../../context/ThemeContext';
 import { Student } from '../../types';
 import { StudentCardSkeleton } from '../../components/Skeleton';
+
+const StudentRow = memo(function StudentRow({
+  item,
+  onPress,
+}: {
+  item: Student;
+  onPress: (id: string) => void;
+}) {
+  const { Colors } = useTheme();
+  const styles = useMemo(() => createStudentRowStyles(Colors), [Colors]);
+
+  return (
+    <View style={styles.studentCard}>
+      <TouchableOpacity activeOpacity={0.85} onPress={() => onPress(item.id)}>
+        <View style={styles.cardHeader}>
+          {item.avatarUrl ? (
+            <Image source={{ uri: item.avatarUrl }} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatarFallback}>
+              <Text style={styles.avatarInitial}>{(item.name || '?').charAt(0)}</Text>
+            </View>
+          )}
+
+          <View style={styles.studentInfo}>
+            <Text style={styles.studentName}>{item.name || 'Tanpa Nama'}</Text>
+            <Text style={styles.studentNis}>NIS: {item.nis || '-'}</Text>
+            <Text style={styles.studentSchool}>
+              {item.schoolName || 'Sekolah'} • {item.classGrade || '-'}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.cardFooter}>
+          <Text style={styles.emailText}>{item.email || '-'}</Text>
+        </View>
+      </TouchableOpacity>
+    </View>
+  );
+});
 
 export default function StudentsScreen() {
   const router = useRouter();
   const { students, schools, deleteAllStudents, isLoading, refreshData } = useApp();
+  const { Colors } = useTheme();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSchool, setSelectedSchool] = useState<string>('Semua');
 
@@ -58,46 +100,14 @@ export default function StudentsScreen() {
     [schools]
   );
 
-  const renderStudentItem = useCallback(
-    ({ item }: { item: Student }) => (
-      <View style={styles.studentCard}>
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={() => router.push({ pathname: '/student-detail', params: { id: item.id } })}
-        >
-          <View style={styles.cardHeader}>
-            {item.avatarUrl ? (
-              <Image source={{ uri: item.avatarUrl }} style={styles.avatar} />
-            ) : (
-              <View style={styles.avatarFallback}>
-                <Text style={styles.avatarInitial}>{(item.name || '?').charAt(0)}</Text>
-              </View>
-            )}
+  const studentKeyExtractor = useCallback((item: Student, index: number) => item?.id || `std-${index}`, []);
 
-            <View style={styles.studentInfo}>
-              <Text style={styles.studentName}>{item.name || 'Tanpa Nama'}</Text>
-              <Text style={styles.studentNis}>NIS: {item.nis || '-'}</Text>
-              <Text style={styles.studentSchool}>
-                {item.schoolName || 'Sekolah'} • {item.classGrade || '-'}
-              </Text>
-            </View>
-
-            <View style={styles.rateBadge}>
-              <Text style={styles.rateText}>{item.attendanceRate ?? 100}%</Text>
-              <Text style={styles.rateLabel}>Hadir</Text>
-            </View>
-          </View>
-
-          <View style={styles.cardFooter}>
-            <Text style={styles.emailText}>{item.email || '-'}</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-    ),
+  const openStudent = useCallback(
+    (id: string) => {
+      router.push({ pathname: '/student-detail', params: { id } });
+    },
     [router]
   );
-
-  const studentKeyExtractor = useCallback((item: Student, index: number) => item?.id || `std-${index}`, []);
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
@@ -175,7 +185,7 @@ export default function StudentsScreen() {
         <FlatList
           data={filteredStudents}
           keyExtractor={studentKeyExtractor}
-          renderItem={renderStudentItem}
+          renderItem={({ item }) => <StudentRow item={item} onPress={openStudent} />}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           initialNumToRender={8}
@@ -213,7 +223,8 @@ export default function StudentsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -289,90 +300,6 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 90,
   },
-  studentCard: {
-    backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 18,
-    padding: 16,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: Colors.outlineVariant,
-    ...Shadows.sm,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    borderWidth: 2,
-    borderColor: Colors.surfaceContainerHigh,
-  },
-  avatarFallback: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: Colors.primaryContainer,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: Colors.surfaceContainerHigh,
-  },
-  avatarInitial: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.onPrimaryContainer,
-  },
-  studentInfo: {
-    flex: 1,
-  },
-  studentName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.onSurface,
-    marginBottom: 2,
-    letterSpacing: -0.1,
-  },
-  studentNis: {
-    fontSize: 12,
-    color: Colors.secondary,
-    marginBottom: 2,
-  },
-  studentSchool: {
-    fontSize: 12,
-    color: Colors.onSurfaceVariant,
-  },
-  rateBadge: {
-    alignItems: 'center',
-    backgroundColor: Colors.surfaceContainer,
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  rateText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.primary,
-  },
-  rateLabel: {
-    fontSize: 10,
-    color: Colors.secondary,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: Colors.surfaceContainerHigh,
-  },
-  emailText: {
-    fontSize: 12,
-    color: Colors.secondary,
-  },
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -414,3 +341,75 @@ const styles = StyleSheet.create({
     ...Shadows.md,
   },
 });
+
+const createStudentRowStyles = (Colors: ThemeColors) =>
+  StyleSheet.create({
+    studentCard: {
+      backgroundColor: Colors.surfaceContainerLowest,
+      borderRadius: 18,
+      padding: 16,
+      marginBottom: 14,
+      borderWidth: 1,
+      borderColor: Colors.outlineVariant,
+      ...Shadows.sm,
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    avatar: {
+      width: 52,
+      height: 52,
+      borderRadius: 26,
+      borderWidth: 2,
+      borderColor: Colors.surfaceContainerHigh,
+    },
+    avatarFallback: {
+      width: 52,
+      height: 52,
+      borderRadius: 26,
+      backgroundColor: Colors.primaryContainer,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 2,
+      borderColor: Colors.surfaceContainerHigh,
+    },
+    avatarInitial: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: Colors.onPrimaryContainer,
+    },
+    studentInfo: {
+      flex: 1,
+    },
+    studentName: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: Colors.onSurface,
+      marginBottom: 2,
+      letterSpacing: -0.1,
+    },
+    studentNis: {
+      fontSize: 12,
+      color: Colors.secondary,
+      marginBottom: 2,
+    },
+    studentSchool: {
+      fontSize: 12,
+      color: Colors.onSurfaceVariant,
+    },
+    cardFooter: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      marginTop: 12,
+      paddingTop: 12,
+      borderTopWidth: 1,
+      borderTopColor: Colors.surfaceContainerHigh,
+    },
+    emailText: {
+      fontSize: 12,
+      color: Colors.secondary,
+    },
+  });

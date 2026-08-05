@@ -20,9 +20,7 @@ export const schoolService = {
     return (schoolsData || []).map((s: any) => ({
       id: s.id,
       name: s.name,
-      npsn: s.npsn || '',
       address: s.address || '',
-      email: s.email || '',
       phone: s.phone || '',
       studentCount: s.students?.[0]?.count || 0,
       status: s.status || 'Aktif',
@@ -37,9 +35,7 @@ export const schoolService = {
 
     const payload = {
       name: school.name,
-      npsn: school.npsn,
       address: school.address,
-      email: school.email,
       phone: school.phone,
       status: school.status || 'Aktif',
       logo_url: school.logoUrl || null,
@@ -59,9 +55,7 @@ export const schoolService = {
     return {
       id: data.id,
       name: data.name,
-      npsn: data.npsn || '',
       address: data.address || '',
-      email: data.email || '',
       phone: data.phone || '',
       studentCount: 0,
       status: data.status || 'Aktif',
@@ -76,9 +70,7 @@ export const schoolService = {
 
     const payload: Record<string, unknown> = {};
     if (data.name !== undefined) payload.name = data.name;
-    if (data.npsn !== undefined) payload.npsn = data.npsn;
     if (data.address !== undefined) payload.address = data.address;
-    if (data.email !== undefined) payload.email = data.email;
     if (data.phone !== undefined) payload.phone = data.phone;
     if (data.status !== undefined) payload.status = data.status;
     if (data.logoUrl !== undefined) payload.logo_url = data.logoUrl;
@@ -98,9 +90,7 @@ export const schoolService = {
     return {
       id: res.id,
       name: res.name,
-      npsn: res.npsn || '',
       address: res.address || '',
-      email: res.email || '',
       phone: res.phone || '',
       studentCount: 0,
       status: res.status || 'Aktif',
@@ -117,6 +107,20 @@ export const schoolService = {
 
     if (error) {
       console.error('Error deleting school in Supabase:', error.message);
+      throw new Error(error.message);
+    }
+  },
+
+  async deleteAllSchools(): Promise<void> {
+    if (!isSupabaseConfigured()) {
+      throw new Error('Supabase belum dikonfigurasi di file .env');
+    }
+
+    // Delete all rows in schools table
+    const { error } = await supabase.from('schools').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+    if (error) {
+      console.error('Error deleting all schools in Supabase:', error.message);
       throw new Error(error.message);
     }
   },

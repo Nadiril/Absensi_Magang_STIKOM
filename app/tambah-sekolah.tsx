@@ -1,25 +1,26 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   StyleSheet,
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { Colors, Shadows } from '../constants/theme';
+import { Shadows, ThemeColors } from '../constants/theme';
 import { useApp } from '../context/AppContext';
+import { useTheme } from '../context/ThemeContext';
 import { Toast, ToastData } from '../components/Toast';
 
 export default function TambahSekolahModal() {
   const router = useRouter();
   const { id: editId } = useLocalSearchParams<{ id?: string }>();
   const { schools, addSchool, updateSchool } = useApp();
+  const { Colors } = useTheme();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
   const isEdit = !!editId;
 
   const editingSchool = schools.find((s) => s.id === editId);
@@ -57,21 +58,15 @@ export default function TambahSekolahModal() {
       if (isEdit && editId && editingSchool) {
         await updateSchool(editId, {
           name: name.trim(),
-          npsn: editingSchool.npsn || '',
           address: address.trim(),
-          email: editingSchool.email || '',
           phone: phone.trim() || '-',
           status: editingSchool.status,
         });
         setToast({ type: 'success', message: 'Data sekolah berhasil diperbarui!' });
       } else {
-        const generatedNpsn = Math.floor(10000000 + Math.random() * 90000000).toString();
-
         await addSchool({
           name: name.trim(),
-          npsn: generatedNpsn,
           address: address.trim(),
-          email: `info@${name.toLowerCase().replace(/[^a-z0-9]/g, '')}.sch.id`,
           phone: phone.trim() || '-',
           studentCount: 0,
           status: 'Aktif',
@@ -88,15 +83,12 @@ export default function TambahSekolahModal() {
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <Stack.Screen options={{ title: isEdit ? 'Edit Data Sekolah' : 'Tambah Sekolah Baru' }} />
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 44 : 0}
-      >
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        enableOnAndroid
+        extraScrollHeight={16}
       >
         <Text style={styles.formTitle}>
           {isEdit ? 'Edit Informasi Data Sekolah' : 'Informasi Data Sekolah'}
@@ -173,15 +165,15 @@ export default function TambahSekolahModal() {
             <Text style={styles.saveBtnText}>{isEdit ? 'Simpan Perubahan' : 'Simpan Sekolah'}</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
 
       <Toast toast={toast} onHide={hideToast} />
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,

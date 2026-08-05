@@ -17,9 +17,7 @@ export interface Student {
 export interface School {
   id: string;
   name: string;
-  npsn: string;
   address: string;
-  email: string;
   phone: string;
   studentCount: number;
   status: 'Aktif' | 'Pending' | 'Nonaktif';

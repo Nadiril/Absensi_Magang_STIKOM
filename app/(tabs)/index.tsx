@@ -11,13 +11,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Colors, Shadows } from '../../constants/theme';
+import { Shadows, ThemeColors } from '../../constants/theme';
 import { useApp } from '../../context/AppContext';
+import { useTheme } from '../../context/ThemeContext';
 import { StatCardSkeleton, ActivityCardSkeleton } from '../../components/Skeleton';
 
 export default function DashboardScreen() {
   const router = useRouter();
   const { students, schools, attendanceRecords, activities, isLoading, refreshData } = useApp();
+  const { Colors } = useTheme();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
@@ -43,6 +46,25 @@ export default function DashboardScreen() {
     [attendanceRecords]
   );
   const notPresentCount = Math.max(0, students.length - attendedCount);
+
+  const attendancePercent = useMemo(() => {
+    if (students.length === 0) return 0;
+    return Math.round((attendedCount / students.length) * 100);
+  }, [attendedCount, students.length]);
+
+  const totalCheckIns = useMemo(() => attendanceRecords.length, [attendanceRecords]);
+  const lateCount = useMemo(
+    () => attendanceRecords.filter((r) => r.status === 'Terlambat').length,
+    [attendanceRecords]
+  );
+  const activeStudents = useMemo(
+    () => students.filter((s) => s.status === 'Aktif').length,
+    [students]
+  );
+  const inactiveStudents = useMemo(
+    () => students.filter((s) => s.status !== 'Aktif').length,
+    [students]
+  );
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
@@ -106,7 +128,7 @@ export default function DashboardScreen() {
                     <Text style={styles.statValue}>{students.length}</Text>
                   </View>
                   <View style={[styles.statIconContainer, { backgroundColor: Colors.primaryContainer }]}>
-                    <Ionicons name="school" size={24} color={Colors.onPrimaryContainer} />
+                    <Ionicons name="people" size={24} color={Colors.onPrimaryContainer} />
                   </View>
                 </LinearGradient>
               </TouchableOpacity>
@@ -136,47 +158,74 @@ export default function DashboardScreen() {
           )}
         </View>
 
-        {/* Quick Access Section */}
+        {/* Statistik Section */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Akses Cepat</Text>
+          <Text style={styles.sectionTitle}>Statistik</Text>
         </View>
 
-        <View style={styles.quickGrid}>
-          <TouchableOpacity
-            style={styles.quickCard}
-            activeOpacity={0.7}
-            onPress={() => router.push('/students')}
-          >
-            <View style={styles.quickIconBg}>
-              <Ionicons name="people" size={22} color={Colors.primary} />
+        <View style={styles.attendanceCard}>
+          <View style={styles.attendanceCardHeader}>
+            <View style={styles.attendanceInfo}>
+              <Text style={styles.statLabel}>PERSENTASE KEHADIRAN</Text>
+              <Text style={styles.attendancePercent}>{attendancePercent}%</Text>
             </View>
-            <Text style={styles.quickCardTitle}>Data Siswa</Text>
-            <Text style={styles.quickCardDesc} numberOfLines={2}>Kelola profil & data siswa</Text>
-          </TouchableOpacity>
+            <View style={[styles.attendanceIcon, { backgroundColor: Colors.primaryContainer }]}>
+              <Ionicons name="pulse" size={22} color={Colors.onPrimaryContainer} />
+            </View>
+          </View>
+          <View style={styles.progressTrack}>
+            <View
+              style={[
+                styles.progressFill,
+                { width: `${attendancePercent}%`, backgroundColor: Colors.primary },
+              ]}
+            />
+          </View>
+          <Text style={styles.attendanceHint}>
+            {attendedCount} dari {students.length} siswa hadir hari ini
+          </Text>
+        </View>
 
-          <TouchableOpacity
-            style={styles.quickCard}
-            activeOpacity={0.7}
-            onPress={() => router.push('/schools')}
-          >
-            <View style={styles.quickIconBg}>
-              <Ionicons name="business" size={22} color={Colors.primary} />
+        <View style={styles.statsMiniGrid}>
+          <View style={styles.statsMiniCard}>
+            <View style={[styles.statsMiniIcon, { backgroundColor: Colors.primaryContainer }]}>
+              <Ionicons name="checkmark-circle" size={20} color={Colors.onPrimaryContainer} />
             </View>
-            <Text style={styles.quickCardTitle}>Data Sekolah</Text>
-            <Text style={styles.quickCardDesc} numberOfLines={2}>Informasi sekolah mitra</Text>
-          </TouchableOpacity>
+            <View style={styles.statsMiniTextGroup}>
+              <Text style={styles.statsMiniValue}>{totalCheckIns}</Text>
+              <Text style={styles.statsMiniLabel}>Total Presensi</Text>
+            </View>
+          </View>
 
-          <TouchableOpacity
-            style={styles.quickCard}
-            activeOpacity={0.7}
-            onPress={() => router.push('/scan')}
-          >
-            <View style={styles.quickIconBg}>
-              <Ionicons name="qr-code" size={22} color={Colors.tertiary} />
+          <View style={styles.statsMiniCard}>
+            <View style={[styles.statsMiniIcon, { backgroundColor: Colors.errorContainer }]}>
+              <Ionicons name="time-outline" size={20} color={Colors.onErrorContainer} />
             </View>
-            <Text style={styles.quickCardTitle}>Absensi QR</Text>
-            <Text style={styles.quickCardDesc} numberOfLines={2}>Scan QR presensi harian</Text>
-          </TouchableOpacity>
+            <View style={styles.statsMiniTextGroup}>
+              <Text style={styles.statsMiniValue}>{lateCount}</Text>
+              <Text style={styles.statsMiniLabel}>Terlambat</Text>
+            </View>
+          </View>
+
+          <View style={styles.statsMiniCard}>
+            <View style={[styles.statsMiniIcon, { backgroundColor: Colors.tertiaryContainer }]}>
+              <Ionicons name="people" size={20} color={Colors.onTertiaryContainer} />
+            </View>
+            <View style={styles.statsMiniTextGroup}>
+              <Text style={styles.statsMiniValue}>{activeStudents}</Text>
+              <Text style={styles.statsMiniLabel}>Siswa Aktif</Text>
+            </View>
+          </View>
+
+          <View style={styles.statsMiniCard}>
+            <View style={[styles.statsMiniIcon, { backgroundColor: Colors.surfaceContainerHigh }]}>
+              <Ionicons name="alert-circle-outline" size={20} color={Colors.onSurfaceVariant} />
+            </View>
+            <View style={styles.statsMiniTextGroup}>
+              <Text style={styles.statsMiniValue}>{inactiveStudents}</Text>
+              <Text style={styles.statsMiniLabel}>Tidak Aktif</Text>
+            </View>
+          </View>
         </View>
 
         {/* Recent Activity Section */}
@@ -250,7 +299,8 @@ export default function DashboardScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -367,40 +417,93 @@ const styles = StyleSheet.create({
     color: Colors.onSurface,
     letterSpacing: -0.2,
   },
-  quickGrid: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 24,
-  },
-  quickCard: {
-    flex: 1,
+  attendanceCard: {
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 16,
-    padding: 14,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
+    padding: 18,
+    marginBottom: 14,
     ...Shadows.sm,
   },
-  quickIconBg: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: Colors.surfaceContainerHigh,
+  attendanceCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  attendanceInfo: {
+    flex: 1,
+  },
+  attendancePercent: {
+    fontSize: 34,
+    fontWeight: '700',
+    color: Colors.primary,
+    marginTop: 2,
+    letterSpacing: -0.6,
+  },
+  attendanceIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
   },
-  quickCardTitle: {
-    fontSize: 13,
+  progressTrack: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.surfaceContainerHigh,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  attendanceHint: {
+    fontSize: 12,
+    color: Colors.secondary,
+    marginTop: 10,
+  },
+  statsMiniGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 28,
+  },
+  statsMiniCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant,
+    padding: 12,
+    width: '48.5%',
+    ...Shadows.sm,
+  },
+  statsMiniIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statsMiniTextGroup: {
+    flexShrink: 1,
+  },
+  statsMiniValue: {
+    fontSize: 17,
     fontWeight: '700',
     color: Colors.onSurface,
-    marginBottom: 2,
-    letterSpacing: -0.1,
+    letterSpacing: -0.2,
   },
-  quickCardDesc: {
-    fontSize: 11,
+  statsMiniLabel: {
+    fontSize: 10,
+    fontWeight: '600',
     color: Colors.secondary,
-    lineHeight: 15,
+    marginTop: 1,
+    letterSpacing: 0.3,
   },
   activityContainer: {
     backgroundColor: Colors.surfaceContainerLowest,

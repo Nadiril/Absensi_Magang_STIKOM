@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   StyleSheet,
   View,
@@ -9,11 +9,16 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Shadows } from '../../constants/theme';
+import { useRouter } from 'expo-router';
+import { Shadows, ThemeColors, ThemeMode } from '../../constants/theme';
 import { useApp } from '../../context/AppContext';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function ProfileScreen() {
-  const { students, schools, clearAllData } = useApp();
+  const router = useRouter();
+  const { students, schools, clearAllData, logout } = useApp();
+  const { Colors, mode: themeMode, setMode: setThemeMode } = useTheme();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
 
   const handleMenuPress = () => {
     Alert.alert('Informasi', 'fitur ini tidak tersedia. Maaf');
@@ -29,8 +34,13 @@ export default function ProfileScreen() {
           text: 'Hapus Semua',
           style: 'destructive',
           onPress: async () => {
-            await clearAllData();
-            Alert.alert('Berhasil', 'Semua data pada aplikasi telah dihapus.');
+            try {
+              await clearAllData();
+              Alert.alert('Berhasil', 'Semua data pada aplikasi telah dihapus.');
+            } catch (err) {
+              console.error('Gagal menghapus semua data:', err);
+              Alert.alert('Gagal', 'Terjadi kesalahan saat menghapus semua data.');
+            }
           },
         },
       ]
@@ -40,7 +50,19 @@ export default function ProfileScreen() {
   const handleLogout = () => {
     Alert.alert('Konfirmasi Keluar', 'Apakah Anda yakin ingin keluar dari akun Admin?', [
       { text: 'Batal', style: 'cancel' },
-      { text: 'Keluar', style: 'destructive', onPress: () => Alert.alert('Informasi', 'Anda telah keluar.') },
+      {
+        text: 'Keluar',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await logout();
+            router.replace('/login');
+          } catch (err) {
+            console.error('Gagal keluar dari akun:', err);
+            Alert.alert('Gagal', 'Terjadi kesalahan saat keluar. Silakan coba lagi.');
+          }
+        },
+      },
     ]);
   };
 
@@ -94,8 +116,8 @@ export default function ProfileScreen() {
             activeOpacity={0.7}
             onPress={handleMenuPress}
           >
-            <View style={[styles.menuIconBg, { backgroundColor: Colors.primaryContainer }]}>
-              <Ionicons name="person-outline" size={20} color={Colors.primary} />
+            <View style={[styles.menuIconBg, { backgroundColor: Colors.surfaceContainerHigh }]}>
+              <Ionicons name="person-outline" size={20} color={Colors.onSurfaceVariant} />
             </View>
             <Text style={styles.menuText}>Edit Informasi Profil</Text>
             <Ionicons name="chevron-forward" size={18} color={Colors.outline} />
@@ -124,6 +146,41 @@ export default function ProfileScreen() {
             <Text style={styles.menuText}>Pengaturan Notifikasi</Text>
             <Ionicons name="chevron-forward" size={18} color={Colors.outline} />
           </TouchableOpacity>
+        </View>
+
+        {/* Menu Section: Tampilan */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionHeader}>Tampilan</Text>
+
+          <View style={styles.themeOptionsRow}>
+            {(
+              [
+                { key: 'auto', label: 'Auto', icon: 'time-outline' },
+                { key: 'light', label: 'Terang', icon: 'sunny-outline' },
+                { key: 'sunset', label: 'Senja', icon: 'partly-sunny-outline' },
+              ] as { key: ThemeMode; label: string; icon: any }[]
+            ).map((option) => {
+              const active = themeMode === option.key;
+              return (
+                <TouchableOpacity
+                  key={option.key}
+                  style={[styles.themeOption, active && styles.themeOptionActive]}
+                  activeOpacity={0.7}
+                  onPress={() => setThemeMode(option.key)}
+                >
+                  <Ionicons
+                    name={option.icon}
+                    size={20}
+                    color={active ? Colors.onPrimaryContainer : Colors.secondary}
+                  />
+                  <Text style={[styles.themeOptionText, active && styles.themeOptionTextActive]}>
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          <Text style={styles.themeHint}>Auto mengikuti waktu: pagi cerah, sore hingga malam hangat senja.</Text>
         </View>
 
         {/* Menu Section 2: Sistem & Laporan */}
@@ -177,7 +234,8 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -333,5 +391,39 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: Colors.onErrorContainer,
+  },
+  themeOptionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 10,
+  },
+  themeOption: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant,
+    backgroundColor: Colors.surfaceContainerLow,
+  },
+  themeOptionActive: {
+    backgroundColor: Colors.primaryContainer,
+    borderColor: Colors.primaryContainer,
+  },
+  themeOptionText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.secondary,
+  },
+  themeOptionTextActive: {
+    color: Colors.onPrimaryContainer,
+  },
+  themeHint: {
+    fontSize: 11,
+    color: Colors.secondary,
+    lineHeight: 16,
   },
 });

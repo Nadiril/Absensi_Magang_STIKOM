@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { StyleSheet, View, Animated, ViewStyle } from 'react-native';
-import { Colors, Shadows } from '../constants/theme';
+import { Shadows, ThemeColors } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 
 interface SkeletonProps {
   width?: number | `${number}%` | 'auto';
@@ -15,6 +16,8 @@ export const SkeletonBox: React.FC<SkeletonProps> = ({
   borderRadius = 8,
   style,
 }) => {
+  const { Colors } = useTheme();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
   const opacity = useRef(new Animated.Value(0.35)).current;
 
   useEffect(() => {
@@ -54,6 +57,8 @@ export const SkeletonBox: React.FC<SkeletonProps> = ({
 };
 
 export const StatCardSkeleton: React.FC = () => {
+  const { Colors } = useTheme();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
   return (
     <View style={styles.statCard}>
       <SkeletonBox width={40} height={40} borderRadius={12} style={{ marginBottom: 12 }} />
@@ -64,6 +69,8 @@ export const StatCardSkeleton: React.FC = () => {
 };
 
 export const StudentCardSkeleton: React.FC = () => {
+  const { Colors } = useTheme();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
   return (
     <View style={styles.studentCard}>
       <View style={styles.cardHeader}>
@@ -84,6 +91,8 @@ export const StudentCardSkeleton: React.FC = () => {
 };
 
 export const SchoolCardSkeleton: React.FC = () => {
+  const { Colors } = useTheme();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
   return (
     <View style={styles.schoolCard}>
       <View style={styles.cardTopRow}>
@@ -105,6 +114,8 @@ export const SchoolCardSkeleton: React.FC = () => {
 };
 
 export const ActivityCardSkeleton: React.FC = () => {
+  const { Colors } = useTheme();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
   return (
     <View style={styles.activityItem}>
       <SkeletonBox width={36} height={36} borderRadius={10} />
@@ -117,7 +128,8 @@ export const ActivityCardSkeleton: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: ThemeColors) =>
+  StyleSheet.create({
   skeletonBox: {
     backgroundColor: Colors.surfaceContainerHighest,
   },

@@ -1,10 +1,32 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/theme';
+import { ThemeColors } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import { Platform, View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 
 export default function TabLayout() {
+  const { Colors } = useTheme();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
+
+  const headerTitle = () => (
+    <View style={styles.headerTitleContainer}>
+      <Image source={require('../../assets/images/image.png')} style={styles.logoImage} />
+      <Text style={styles.headerTitleText}>Magangku</Text>
+    </View>
+  );
+
+  const headerRight = () => (
+    <TouchableOpacity style={styles.profileHeaderBtn} activeOpacity={0.8}>
+      <View style={styles.avatarWrapper}>
+        <View style={styles.headerAvatarFallback}>
+          <Ionicons name="person" size={16} color={Colors.onPrimaryContainer} />
+        </View>
+        <View style={styles.onlineBadge} />
+      </View>
+    </TouchableOpacity>
+  );
+
   return (
     <Tabs
       screenOptions={{
@@ -38,22 +60,8 @@ export default function TabLayout() {
           borderBottomWidth: 1,
           borderBottomColor: Colors.outlineVariant,
         },
-        headerTitle: () => (
-          <View style={styles.headerTitleContainer}>
-            <Image source={require('../../assets/images/image.png')} style={styles.logoImage} />
-            <Text style={styles.headerTitleText}>Magangku</Text>
-          </View>
-        ),
-        headerRight: () => (
-          <TouchableOpacity style={styles.profileHeaderBtn} activeOpacity={0.8}>
-            <View style={styles.avatarWrapper}>
-              <View style={styles.headerAvatarFallback}>
-                <Ionicons name="person" size={16} color={Colors.onPrimaryContainer} />
-              </View>
-              <View style={styles.onlineBadge} />
-            </View>
-          </TouchableOpacity>
-        ),
+        headerTitle,
+        headerRight,
       }}
     >
       {/* 1. Beranda */}
@@ -116,75 +124,76 @@ export default function TabLayout() {
   );
 }
 
-const styles = StyleSheet.create({
-  headerTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  logoImage: {
-    width: 28,
-    height: 28,
-    resizeMode: 'contain',
-  },
-  headerTitleText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.primary,
-    letterSpacing: -0.3,
-  },
-  profileHeaderBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 16,
-    backgroundColor: Colors.surfaceContainerLow,
-    padding: 5,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: Colors.outlineVariant,
-  },
-  avatarWrapper: {
-    position: 'relative',
-  },
-  headerAvatarFallback: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: Colors.primaryContainer,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  onlineBadge: {
-    position: 'absolute',
-    right: -1,
-    bottom: -1,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#10b981',
-    borderWidth: 1.5,
-    borderColor: '#ffffff',
-  },
+const createStyles = (Colors: ThemeColors) =>
+  StyleSheet.create({
+    headerTitleContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    logoImage: {
+      width: 28,
+      height: 28,
+      resizeMode: 'contain',
+    },
+    headerTitleText: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: Colors.primary,
+      letterSpacing: -0.3,
+    },
+    profileHeaderBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginRight: 16,
+      backgroundColor: Colors.surfaceContainerLow,
+      padding: 5,
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: Colors.outlineVariant,
+    },
+    avatarWrapper: {
+      position: 'relative',
+    },
+    headerAvatarFallback: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: Colors.primaryContainer,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    onlineBadge: {
+      position: 'absolute',
+      right: -1,
+      bottom: -1,
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: '#10b981',
+      borderWidth: 1.5,
+      borderColor: '#ffffff',
+    },
 
-  /* Prominent Center Tab Button */
-  prominentCenterBtn: {
-    width: 54,
-    height: 54,
-    borderRadius: 18,
-    backgroundColor: Colors.primaryContainer,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: Platform.OS === 'ios' ? -18 : -24,
-    elevation: 6,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.28,
-    shadowRadius: 8,
-    borderWidth: 3.5,
-    borderColor: Colors.surfaceContainerLowest,
-  },
-  prominentCenterBtnActive: {
-    backgroundColor: Colors.primary,
-    transform: [{ scale: 1.08 }],
-  },
-});
+    /* Prominent Center Tab Button */
+    prominentCenterBtn: {
+      width: 54,
+      height: 54,
+      borderRadius: 18,
+      backgroundColor: Colors.primaryContainer,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: Platform.OS === 'ios' ? -18 : -24,
+      elevation: 6,
+      shadowColor: Colors.primary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.28,
+      shadowRadius: 8,
+      borderWidth: 3.5,
+      borderColor: Colors.surfaceContainerLowest,
+    },
+    prominentCenterBtnActive: {
+      backgroundColor: Colors.primary,
+      transform: [{ scale: 1.08 }],
+    },
+  });

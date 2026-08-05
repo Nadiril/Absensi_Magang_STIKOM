@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   StyleSheet,
   View,
@@ -7,20 +7,22 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { Colors, Shadows } from '../constants/theme';
+import { Shadows, ThemeColors } from '../constants/theme';
 import { useApp } from '../context/AppContext';
+import { useTheme } from '../context/ThemeContext';
 import { Toast, ToastData } from '../components/Toast';
 
 export default function TambahSiswaModal() {
   const router = useRouter();
   const { id: editId } = useLocalSearchParams<{ id?: string }>();
   const { students, schools, addStudent, updateStudent } = useApp();
+  const { Colors } = useTheme();
+  const styles = useMemo(() => createStyles(Colors), [Colors]);
   const isEdit = !!editId;
 
   const editingStudent = students.find((s) => s.id === editId);
@@ -62,7 +64,7 @@ export default function TambahSiswaModal() {
 
   const filteredSchools = schools.filter((sch) =>
     sch.name.toLowerCase().includes(schoolSearch.toLowerCase()) ||
-    sch.npsn.includes(schoolSearch)
+    sch.address.toLowerCase().includes(schoolSearch.toLowerCase())
   );
 
   const handleSave = async () => {
@@ -102,15 +104,12 @@ export default function TambahSiswaModal() {
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <Stack.Screen options={{ title: isEdit ? 'Edit Data Siswa' : 'Tambah Siswa Baru' }} />
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 44 : 0}
-      >
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        enableOnAndroid
+        extraScrollHeight={16}
       >
         <Text style={styles.formTitle}>
           {isEdit ? 'Edit Data Siswa Baru' : 'Tambah Data Siswa Baru'}
@@ -236,8 +235,7 @@ export default function TambahSiswaModal() {
             <Text style={styles.saveBtnText}>{isEdit ? 'Simpan Perubahan' : 'Simpan Siswa'}</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
 
       <Toast toast={toast} onHide={hideToast} />
 
@@ -307,7 +305,7 @@ export default function TambahSiswaModal() {
                           selectedSchool?.id === sch.id && styles.schoolSelectSubActive,
                         ]}
                       >
-                        NPSN: {sch.npsn}
+                        {sch.address || 'Alamat belum diisi'}
                       </Text>
                     </View>
                     {selectedSchool?.id === sch.id && (
@@ -324,7 +322,8 @@ export default function TambahSiswaModal() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (Colors: ThemeColors) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
