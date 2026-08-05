@@ -4,7 +4,6 @@ import {
   View,
   Text,
   ScrollView,
-  Image,
   TouchableOpacity,
   Alert,
 } from 'react-native';
@@ -16,8 +15,8 @@ import { useApp } from '../../context/AppContext';
 export default function ProfileScreen() {
   const { students, schools, clearAllData } = useApp();
 
-  const handleMenuPress = (menuName: string) => {
-    Alert.alert('Menu Profil', `Menu "${menuName}" berhasil dibuka.`);
+  const handleMenuPress = () => {
+    Alert.alert('Informasi', 'fitur ini tidak tersedia. Maaf');
   };
 
   const handleClearAllData = () => {
@@ -46,7 +45,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Page Header */}
         <Text style={styles.pageTitle}>Profil Administrator</Text>
@@ -54,18 +53,15 @@ export default function ProfileScreen() {
         {/* Profile Card Header */}
         <View style={styles.profileHeaderCard}>
           <View style={styles.avatarContainer}>
-            <Image
-              source={{
-                uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
-              }}
-              style={styles.avatar}
-            />
+            <View style={styles.avatarFallback}>
+              <Ionicons name="person" size={44} color={Colors.onPrimaryContainer} />
+            </View>
             <View style={styles.activeRing} />
           </View>
 
-          <Text style={styles.adminName}>Academic Admin</Text>
+          <Text style={styles.adminName}>Front Office</Text>
           <Text style={styles.adminRole}>Pengelola Sistem Presensi & Magang</Text>
-          <Text style={styles.schoolAffiliate}>Central High School • ID: 8829</Text>
+          
 
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
@@ -96,7 +92,7 @@ export default function ProfileScreen() {
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
-            onPress={() => handleMenuPress('Edit Profil')}
+            onPress={handleMenuPress}
           >
             <View style={[styles.menuIconBg, { backgroundColor: Colors.primaryContainer }]}>
               <Ionicons name="person-outline" size={20} color={Colors.primary} />
@@ -108,7 +104,7 @@ export default function ProfileScreen() {
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
-            onPress={() => handleMenuPress('Keamanan')}
+            onPress={handleMenuPress}
           >
             <View style={[styles.menuIconBg, { backgroundColor: Colors.surfaceContainerHigh }]}>
               <Ionicons name="lock-closed-outline" size={20} color={Colors.onSurfaceVariant} />
@@ -120,7 +116,7 @@ export default function ProfileScreen() {
           <TouchableOpacity
             style={[styles.menuItem, styles.lastMenuItem]}
             activeOpacity={0.7}
-            onPress={() => handleMenuPress('Notifikasi')}
+            onPress={handleMenuPress}
           >
             <View style={[styles.menuIconBg, { backgroundColor: Colors.surfaceContainerHigh }]}>
               <Ionicons name="notifications-outline" size={20} color={Colors.onSurfaceVariant} />
@@ -137,7 +133,7 @@ export default function ProfileScreen() {
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
-            onPress={() => handleMenuPress('Ekspor Laporan')}
+            onPress={handleMenuPress}
           >
             <View style={[styles.menuIconBg, { backgroundColor: Colors.tertiaryContainer }]}>
               <Ionicons name="document-text-outline" size={20} color={Colors.onTertiaryContainer} />
@@ -149,7 +145,7 @@ export default function ProfileScreen() {
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
-            onPress={() => handleMenuPress('Pusat Bantuan')}
+            onPress={handleMenuPress}
           >
             <View style={[styles.menuIconBg, { backgroundColor: Colors.surfaceContainerHigh }]}>
               <Ionicons name="help-circle-outline" size={20} color={Colors.onSurfaceVariant} />
@@ -163,11 +159,11 @@ export default function ProfileScreen() {
             activeOpacity={0.7}
             onPress={handleClearAllData}
           >
-            <View style={[styles.menuIconBg, { backgroundColor: '#fee2e2' }]}>
-              <Ionicons name="trash-outline" size={20} color={Colors.error} />
+            <View style={[styles.menuIconBg, { backgroundColor: Colors.errorContainer }]}>
+              <Ionicons name="trash-outline" size={20} color={Colors.onErrorContainer} />
             </View>
-            <Text style={[styles.menuText, { color: Colors.error }]}>Hapus Semua Data Aplikasi</Text>
-            <Ionicons name="chevron-forward" size={18} color={Colors.error} />
+            <Text style={[styles.menuText, { color: Colors.onErrorContainer }]}>Hapus Semua Data Aplikasi</Text>
+            <Ionicons name="chevron-forward" size={18} color={Colors.onErrorContainer} />
           </TouchableOpacity>
         </View>
 
@@ -187,7 +183,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   scrollContent: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 8,
     paddingBottom: 40,
   },
   pageTitle: {
@@ -195,11 +192,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.onSurface,
     marginBottom: 16,
+    letterSpacing: -0.3,
   },
   profileHeaderCard: {
     backgroundColor: Colors.surfaceContainerLowest,
     borderRadius: 20,
-    padding: 20,
+    padding: 24,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
@@ -208,12 +206,17 @@ const styles = StyleSheet.create({
   },
   avatarContainer: {
     position: 'relative',
-    marginBottom: 12,
+    marginBottom: 14,
   },
-  avatar: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
+  avatarFallback: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: Colors.primaryContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: Colors.primaryFixed,
   },
   activeRing: {
     position: 'absolute',
@@ -231,6 +234,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.onSurface,
     marginBottom: 2,
+    letterSpacing: -0.2,
   },
   adminRole: {
     fontSize: 13,
@@ -268,7 +272,7 @@ const styles = StyleSheet.create({
   },
   statDivider: {
     width: 1,
-    height: 24,
+    height: 28,
     backgroundColor: Colors.outlineVariant,
   },
   sectionCard: {
@@ -281,28 +285,28 @@ const styles = StyleSheet.create({
     ...Shadows.sm,
   },
   sectionHeader: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
     color: Colors.secondary,
-    marginBottom: 12,
+    marginBottom: 10,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.6,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: Colors.surfaceContainerHigh,
-    gap: 12,
+    gap: 14,
   },
   lastMenuItem: {
     borderBottomWidth: 0,
   },
   menuIconBg: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -311,22 +315,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: Colors.onSurface,
+    letterSpacing: -0.1,
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 48,
-    borderRadius: 14,
+    height: 52,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: Colors.errorContainer,
-    backgroundColor: '#fef2f2',
+    backgroundColor: Colors.errorContainer,
     gap: 8,
     marginTop: 8,
   },
   logoutText: {
     fontSize: 14,
     fontWeight: '700',
-    color: Colors.error,
+    color: Colors.onErrorContainer,
   },
 });

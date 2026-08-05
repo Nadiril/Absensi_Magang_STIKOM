@@ -60,7 +60,7 @@ export default function ScanScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
@@ -251,7 +251,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   scrollContent: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 8,
     paddingBottom: 40,
   },
   pageTitle: {
@@ -259,15 +260,17 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.onSurface,
     marginBottom: 2,
+    letterSpacing: -0.3,
   },
   pageSubtitle: {
     fontSize: 13,
     color: Colors.secondary,
     marginBottom: 16,
+    lineHeight: 18,
   },
   scannerBox: {
     backgroundColor: '#111827',
-    borderRadius: 20,
+    borderRadius: 24,
     padding: 20,
     alignItems: 'center',
     marginBottom: 20,
@@ -307,9 +310,9 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   flashButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
@@ -320,7 +323,7 @@ const styles = StyleSheet.create({
   viewfinderFrame: {
     width: 230,
     height: 230,
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
@@ -355,35 +358,35 @@ const styles = StyleSheet.create({
   },
   corner: {
     position: 'absolute',
-    width: 24,
-    height: 24,
+    width: 26,
+    height: 26,
     borderColor: Colors.primaryContainer,
     zIndex: 10,
   },
   topLeft: {
-    top: -2,
-    left: -2,
+    top: 6,
+    left: 6,
     borderTopWidth: 4,
     borderLeftWidth: 4,
     borderTopLeftRadius: 12,
   },
   topRight: {
-    top: -2,
-    right: -2,
+    top: 6,
+    right: 6,
     borderTopWidth: 4,
     borderRightWidth: 4,
     borderTopRightRadius: 12,
   },
   bottomLeft: {
-    bottom: -2,
-    left: -2,
+    bottom: 6,
+    left: 6,
     borderBottomWidth: 4,
     borderLeftWidth: 4,
     borderBottomLeftRadius: 12,
   },
   bottomRight: {
-    bottom: -2,
-    right: -2,
+    bottom: 6,
+    right: 6,
     borderBottomWidth: 4,
     borderRightWidth: 4,
     borderBottomRightRadius: 12,
@@ -396,19 +399,19 @@ const styles = StyleSheet.create({
   resultCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 16,
     marginBottom: 20,
     gap: 12,
     borderWidth: 1,
   },
   successResult: {
-    backgroundColor: '#ecfdf5',
-    borderColor: '#a7f3d0',
+    backgroundColor: Colors.successContainer,
+    borderColor: Colors.successContainer,
   },
   errorResult: {
-    backgroundColor: '#fef2f2',
-    borderColor: '#fecaca',
+    backgroundColor: Colors.errorContainer,
+    borderColor: Colors.errorContainer,
   },
   resultTextContainer: {
     flex: 1,
@@ -421,10 +424,11 @@ const styles = StyleSheet.create({
   resultMessage: {
     fontSize: 13,
     color: Colors.onSurfaceVariant,
+    lineHeight: 18,
   },
   manualCard: {
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 18,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
@@ -435,6 +439,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.onSurface,
     marginBottom: 4,
+    letterSpacing: -0.1,
   },
   manualSubtitle: {
     fontSize: 12,
@@ -450,9 +455,9 @@ const styles = StyleSheet.create({
   nisInput: {
     flex: 1,
     backgroundColor: Colors.surfaceContainerLow,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 14,
-    height: 48,
+    height: 52,
     fontSize: 15,
     color: Colors.onSurface,
     borderWidth: 1,
@@ -460,11 +465,12 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     backgroundColor: Colors.primary,
-    paddingHorizontal: 20,
-    height: 48,
-    borderRadius: 12,
+    paddingHorizontal: 22,
+    height: 52,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Shadows.sm,
   },
   submitButtonText: {
     fontSize: 14,
@@ -512,7 +518,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surfaceContainerLow,
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 14,
     gap: 12,
     marginBottom: 16,
@@ -550,11 +556,12 @@ const styles = StyleSheet.create({
   },
   modalButton: {
     width: '100%',
-    height: 48,
-    borderRadius: 12,
+    height: 52,
+    borderRadius: 14,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Shadows.sm,
   },
   modalButtonText: {
     fontSize: 14,

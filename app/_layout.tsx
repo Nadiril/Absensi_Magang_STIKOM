@@ -16,6 +16,7 @@ export default function RootLayout() {
             backgroundColor: Colors.surface,
           },
           headerTintColor: Colors.primary,
+          headerShadowVisible: false,
           headerTitleStyle: {
             fontWeight: '600',
           },

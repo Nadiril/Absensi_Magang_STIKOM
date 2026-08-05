@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 16,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   },
   studentCard: {
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   },
   schoolCard: {
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
@@ -181,8 +181,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surfaceContainerLowest,
-    padding: 12,
-    borderRadius: 12,
+    padding: 14,
+    borderRadius: 14,
     marginBottom: 8,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,

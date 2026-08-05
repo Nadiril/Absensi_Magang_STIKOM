@@ -12,14 +12,15 @@ export default function TabLayout() {
         tabBarInactiveTintColor: Colors.onSurfaceVariant,
         tabBarStyle: {
           backgroundColor: Colors.surfaceContainerLowest,
+          borderTopWidth: 1,
           borderTopColor: Colors.outlineVariant,
-          height: Platform.OS === 'ios' ? 88 : 68,
+          height: Platform.OS === 'ios' ? 88 : 72,
           paddingBottom: Platform.OS === 'ios' ? 28 : 10,
           paddingTop: 8,
-          elevation: 8,
-          shadowColor: Colors.primary,
+          elevation: 0,
+          shadowColor: '#000000',
           shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.08,
+          shadowOpacity: 0.04,
           shadowRadius: 6,
         },
         tabBarLabelStyle: {
@@ -29,34 +30,28 @@ export default function TabLayout() {
         },
         headerStyle: {
           backgroundColor: Colors.surface,
-          elevation: 2,
-          shadowColor: Colors.primary,
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.05,
-          shadowRadius: 4,
+          elevation: 0,
+          shadowColor: '#000000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0,
+          shadowRadius: 0,
           borderBottomWidth: 1,
           borderBottomColor: Colors.outlineVariant,
         },
         headerTitle: () => (
           <View style={styles.headerTitleContainer}>
-            <View style={styles.logoBg}>
-              <Ionicons name="school" size={18} color={Colors.onPrimary} />
-            </View>
+            <Image source={require('../../assets/images/image.png')} style={styles.logoImage} />
             <Text style={styles.headerTitleText}>Magangku</Text>
           </View>
         ),
         headerRight: () => (
           <TouchableOpacity style={styles.profileHeaderBtn} activeOpacity={0.8}>
             <View style={styles.avatarWrapper}>
-              <Image
-                source={{
-                  uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
-                }}
-                style={styles.headerAvatar}
-              />
+              <View style={styles.headerAvatarFallback}>
+                <Ionicons name="person" size={16} color={Colors.onPrimaryContainer} />
+              </View>
               <View style={styles.onlineBadge} />
             </View>
-            <Text style={styles.adminRoleText}>Admin</Text>
           </TouchableOpacity>
         ),
       }}
@@ -127,39 +122,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  logoBg: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: Colors.primaryContainer,
-    alignItems: 'center',
-    justifyContent: 'center',
+  logoImage: {
+    width: 28,
+    height: 28,
+    resizeMode: 'contain',
   },
   headerTitleText: {
     fontSize: 20,
     fontWeight: '700',
     color: Colors.primary,
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
   },
   profileHeaderBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     marginRight: 16,
-    gap: 8,
     backgroundColor: Colors.surfaceContainerLow,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 20,
+    padding: 5,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
   },
   avatarWrapper: {
     position: 'relative',
   },
-  headerAvatar: {
+  headerAvatarFallback: {
     width: 28,
     height: 28,
     borderRadius: 14,
+    backgroundColor: Colors.primaryContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   onlineBadge: {
     position: 'absolute',
@@ -172,27 +165,21 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#ffffff',
   },
-  adminRoleText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: Colors.onSurface,
-    marginRight: 4,
-  },
 
   /* Prominent Center Tab Button */
   prominentCenterBtn: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 54,
+    height: 54,
+    borderRadius: 18,
     backgroundColor: Colors.primaryContainer,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: Platform.OS === 'ios' ? -18 : -22,
+    marginTop: Platform.OS === 'ios' ? -18 : -24,
     elevation: 6,
     shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    shadowOpacity: 0.28,
+    shadowRadius: 8,
     borderWidth: 3.5,
     borderColor: Colors.surfaceContainerLowest,
   },

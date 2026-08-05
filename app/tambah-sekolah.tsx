@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { Colors } from '../constants/theme';
+import { Colors, Shadows } from '../constants/theme';
 import { useApp } from '../context/AppContext';
 import { Toast, ToastData } from '../components/Toast';
 
@@ -86,7 +86,7 @@ export default function TambahSekolahModal() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <Stack.Screen options={{ title: isEdit ? 'Edit Data Sekolah' : 'Tambah Sekolah Baru' }} />
       <KeyboardAvoidingView
         style={styles.container}
@@ -187,7 +187,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   scrollContent: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 8,
     paddingBottom: 40,
   },
   formTitle: {
@@ -195,6 +196,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.onSurface,
     marginBottom: 20,
+    letterSpacing: -0.2,
   },
   inputGroup: {
     marginBottom: 18,
@@ -204,21 +206,22 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.onSurface,
     marginBottom: 8,
+    letterSpacing: 0.1,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 14,
-    height: 48,
+    height: 52,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
   },
   multilineWrapper: {
-    height: 90,
+    height: 92,
     alignItems: 'flex-start',
-    paddingVertical: 10,
+    paddingVertical: 12,
   },
   input: {
     flex: 1,
@@ -232,12 +235,12 @@ const styles = StyleSheet.create({
   actionRow: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 24,
+    marginTop: 28,
   },
   cancelBtn: {
     flex: 1,
-    height: 48,
-    borderRadius: 12,
+    height: 52,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     backgroundColor: Colors.surfaceContainerLowest,
@@ -251,11 +254,12 @@ const styles = StyleSheet.create({
   },
   saveBtn: {
     flex: 1,
-    height: 48,
-    borderRadius: 12,
+    height: 52,
+    borderRadius: 14,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Shadows.sm,
   },
   saveBtnText: {
     fontSize: 14,

@@ -1,17 +1,15 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   StyleSheet,
   View,
   Text,
   ScrollView,
   TouchableOpacity,
-  Platform,
   RefreshControl,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Colors, Shadows } from '../../constants/theme';
 import { useApp } from '../../context/AppContext';
@@ -19,14 +17,14 @@ import { StatCardSkeleton, ActivityCardSkeleton } from '../../components/Skeleto
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const { students, schools, activities, isLoading, refreshData } = useApp();
-  const [activeQuickIndex, setActiveQuickIndex] = useState(0);
+  const { students, schools, attendanceRecords, activities, isLoading, refreshData } = useApp();
 
-  const handleQuickScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const contentOffsetX = event.nativeEvent.contentOffset.x;
-    const itemWidth = 182; // 170 width + 12 gap
-    const index = Math.min(2, Math.max(0, Math.round(contentOffsetX / itemWidth)));
-    setActiveQuickIndex(index);
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 11) return 'Selamat pagi, Front Office';
+    if (hour >= 11 && hour < 15) return 'Selamat siang, Front Office';
+    if (hour >= 15 && hour < 18) return 'Selamat sore, Front Office';
+    return 'Selamat malam, Front Office';
   }, []);
 
   const formattedDate = useMemo(
@@ -40,8 +38,14 @@ export default function DashboardScreen() {
     []
   );
 
+  const attendedCount = useMemo(
+    () => new Set(attendanceRecords.map((r) => r.studentId)).size,
+    [attendanceRecords]
+  );
+  const notPresentCount = Math.max(0, students.length - attendedCount);
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -51,8 +55,29 @@ export default function DashboardScreen() {
       >
         {/* Welcome Section */}
         <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeTitle}>Welcome back, Admin</Text>
+          <Text style={styles.welcomeTitle}>{greeting}</Text>
           <Text style={styles.welcomeDate}>{formattedDate}</Text>
+
+          <View style={styles.summaryRow}>
+            <View style={styles.summaryCard}>
+              <View style={[styles.summaryIcon, { backgroundColor: Colors.successContainer }]}>
+                <Ionicons name="checkmark" size={14} color={Colors.onSuccessContainer} />
+              </View>
+              <View style={styles.summaryTextGroup}>
+                <Text style={styles.summaryValue}>{attendedCount} hadir</Text>
+                <Text style={[styles.summaryLabel, { color: Colors.tertiary }]}>Hadir</Text>
+              </View>
+            </View>
+            <View style={styles.summaryCard}>
+              <View style={[styles.summaryIcon, { backgroundColor: Colors.errorContainer }]}>
+                <Ionicons name="close" size={14} color={Colors.onErrorContainer} />
+              </View>
+              <View style={styles.summaryTextGroup}>
+                <Text style={[styles.summaryValue, { color: Colors.error }]}>{notPresentCount} tidak hadir</Text>
+                <Text style={[styles.summaryLabel, { color: Colors.error }]}>Tidak Hadir</Text>
+              </View>
+            </View>
+          </View>
         </View>
 
         {/* Stat Cards Grid */}
@@ -70,13 +95,20 @@ export default function DashboardScreen() {
                 activeOpacity={0.8}
                 onPress={() => router.push('/students')}
               >
-                <View style={styles.statInfo}>
-                  <Text style={styles.statLabel}>TOTAL SISWA</Text>
-                  <Text style={styles.statValue}>{students.length}</Text>
-                </View>
-                <View style={[styles.statIconContainer, { backgroundColor: Colors.primaryContainer }]}>
-                  <Ionicons name="school" size={24} color={Colors.onPrimaryContainer} />
-                </View>
+                <LinearGradient
+                  colors={[Colors.surfaceContainerHigh, Colors.surfaceContainerLowest]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.statCardGradient}
+                >
+                  <View style={styles.statInfo}>
+                    <Text style={styles.statLabel}>TOTAL SISWA</Text>
+                    <Text style={styles.statValue}>{students.length}</Text>
+                  </View>
+                  <View style={[styles.statIconContainer, { backgroundColor: Colors.primaryContainer }]}>
+                    <Ionicons name="school" size={24} color={Colors.onPrimaryContainer} />
+                  </View>
+                </LinearGradient>
               </TouchableOpacity>
 
               {/* Registered Schools */}
@@ -85,13 +117,20 @@ export default function DashboardScreen() {
                 activeOpacity={0.8}
                 onPress={() => router.push('/schools')}
               >
-                <View style={styles.statInfo}>
-                  <Text style={styles.statLabel}>TERDAFTAR SEKOLAH</Text>
-                  <Text style={styles.statValue}>{schools.length}</Text>
-                </View>
-                <View style={[styles.statIconContainer, { backgroundColor: Colors.tertiaryContainer }]}>
-                  <Ionicons name="business" size={24} color={Colors.onTertiaryContainer} />
-                </View>
+                <LinearGradient
+                  colors={[Colors.surfaceContainerHigh, Colors.surfaceContainerLowest]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.statCardGradient}
+                >
+                  <View style={styles.statInfo}>
+                    <Text style={styles.statLabel}>TERDAFTAR SEKOLAH</Text>
+                    <Text style={styles.statValue}>{schools.length}</Text>
+                  </View>
+                  <View style={[styles.statIconContainer, { backgroundColor: Colors.tertiaryContainer }]}>
+                    <Ionicons name="business" size={24} color={Colors.onTertiaryContainer} />
+                  </View>
+                </LinearGradient>
               </TouchableOpacity>
             </>
           )}
@@ -102,13 +141,7 @@ export default function DashboardScreen() {
           <Text style={styles.sectionTitle}>Akses Cepat</Text>
         </View>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          onScroll={handleQuickScroll}
-          scrollEventThrottle={16}
-          contentContainerStyle={styles.quickAccessList}
-        >
+        <View style={styles.quickGrid}>
           <TouchableOpacity
             style={styles.quickCard}
             activeOpacity={0.7}
@@ -118,7 +151,7 @@ export default function DashboardScreen() {
               <Ionicons name="people" size={22} color={Colors.primary} />
             </View>
             <Text style={styles.quickCardTitle}>Data Siswa</Text>
-            <Text style={styles.quickCardDesc}>Kelola profil & data siswa</Text>
+            <Text style={styles.quickCardDesc} numberOfLines={2}>Kelola profil & data siswa</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -130,7 +163,7 @@ export default function DashboardScreen() {
               <Ionicons name="business" size={22} color={Colors.primary} />
             </View>
             <Text style={styles.quickCardTitle}>Data Sekolah</Text>
-            <Text style={styles.quickCardDesc}>Informasi sekolah mitra</Text>
+            <Text style={styles.quickCardDesc} numberOfLines={2}>Informasi sekolah mitra</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -142,21 +175,8 @@ export default function DashboardScreen() {
               <Ionicons name="qr-code" size={22} color={Colors.tertiary} />
             </View>
             <Text style={styles.quickCardTitle}>Absensi QR</Text>
-            <Text style={styles.quickCardDesc}>Scan QR presensi harian</Text>
+            <Text style={styles.quickCardDesc} numberOfLines={2}>Scan QR presensi harian</Text>
           </TouchableOpacity>
-        </ScrollView>
-
-        {/* Akses Cepat Pagination Dots */}
-        <View style={styles.paginationDotsRow}>
-          {[0, 1, 2].map((idx) => (
-            <View
-              key={idx}
-              style={[
-                styles.paginationDot,
-                activeQuickIndex === idx ? styles.activeDot : styles.inactiveDot,
-              ]}
-            />
-          ))}
         </View>
 
         {/* Recent Activity Section */}
@@ -172,7 +192,12 @@ export default function DashboardScreen() {
               <ActivityCardSkeleton />
             </>
           ) : activities.length === 0 ? (
-            <Text style={{ fontSize: 13, color: Colors.secondary, padding: 12 }}>Belum ada aktivitas terbaru.</Text>
+            <View style={styles.emptyActivity}>
+              <View style={styles.emptyActivityIcon}>
+                <Ionicons name="time-outline" size={26} color={Colors.onSurfaceVariant} />
+              </View>
+              <Text style={styles.emptyActivityText}>Belum ada aktivitas terbaru.</Text>
+            </View>
           ) : (
             activities.map((item, index) => (
               <View
@@ -231,37 +256,85 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   scrollContent: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 8,
     paddingBottom: 40,
   },
   welcomeSection: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   welcomeTitle: {
     fontSize: 24,
     fontWeight: '700',
     color: Colors.onSurface,
     marginBottom: 4,
+    letterSpacing: -0.4,
   },
   welcomeDate: {
     fontSize: 14,
     color: Colors.secondary,
+    letterSpacing: 0.1,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 14,
+  },
+  summaryCard: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    ...Shadows.sm,
+  },
+  summaryIcon: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  summaryTextGroup: {
+    flexShrink: 1,
+  },
+  summaryValue: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.onSurface,
+    letterSpacing: -0.1,
+  },
+  summaryLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: Colors.secondary,
+    marginTop: 1,
+    letterSpacing: 0.3,
   },
   statsGrid: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 24,
+    gap: 14,
+    marginBottom: 28,
   },
   statCard: {
     flex: 1,
-    backgroundColor: Colors.surfaceContainer,
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant,
+    overflow: 'hidden',
+    ...Shadows.sm,
+  },
+  statCardGradient: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    padding: 18,
   },
   statInfo: {
     flex: 1,
@@ -279,29 +352,31 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   },
   statIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
   sectionHeader: {
-    marginBottom: 12,
+    marginBottom: 14,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
     color: Colors.onSurface,
+    letterSpacing: -0.2,
   },
-  quickAccessList: {
-    gap: 12,
-    paddingBottom: 16,
+  quickGrid: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 24,
   },
   quickCard: {
-    width: 170,
+    flex: 1,
     backgroundColor: Colors.surfaceContainerLowest,
     borderRadius: 16,
-    padding: 16,
+    padding: 14,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     ...Shadows.sm,
@@ -309,50 +384,32 @@ const styles = StyleSheet.create({
   quickIconBg: {
     width: 40,
     height: 40,
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: Colors.surfaceContainerHigh,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   quickCardTitle: {
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '700',
     color: Colors.onSurface,
-    marginBottom: 4,
+    marginBottom: 2,
+    letterSpacing: -0.1,
   },
   quickCardDesc: {
-    fontSize: 12,
+    fontSize: 11,
     color: Colors.secondary,
-    lineHeight: 16,
-  },
-  paginationDotsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 4,
-    marginBottom: 20,
-  },
-  paginationDot: {
-    height: 8,
-    borderRadius: 4,
-  },
-  activeDot: {
-    width: 20,
-    backgroundColor: Colors.primary,
-  },
-  inactiveDot: {
-    width: 8,
-    backgroundColor: Colors.outlineVariant,
+    lineHeight: 15,
   },
   activityContainer: {
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 16,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     overflow: 'hidden',
     marginTop: 4,
+    ...Shadows.sm,
   },
   activityItem: {
     flexDirection: 'row',
@@ -360,15 +417,15 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.surfaceContainerHigh,
-    gap: 12,
+    gap: 14,
   },
   lastActivityItem: {
     borderBottomWidth: 0,
   },
   activityIconBg: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -385,6 +442,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: Colors.onSurface,
+    letterSpacing: -0.1,
   },
   activityTime: {
     fontSize: 11,
@@ -393,5 +451,24 @@ const styles = StyleSheet.create({
   activitySubtitle: {
     fontSize: 13,
     color: Colors.onSurfaceVariant,
+    lineHeight: 18,
+  },
+  emptyActivity: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+    gap: 10,
+  },
+  emptyActivityIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: Colors.surfaceContainerHigh,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyActivityText: {
+    fontSize: 13,
+    color: Colors.secondary,
   },
 });

@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { Colors } from '../constants/theme';
+import { Colors, Shadows } from '../constants/theme';
 import { useApp } from '../context/AppContext';
 import { Toast, ToastData } from '../components/Toast';
 
@@ -100,7 +100,7 @@ export default function TambahSiswaModal() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <Stack.Screen options={{ title: isEdit ? 'Edit Data Siswa' : 'Tambah Siswa Baru' }} />
       <KeyboardAvoidingView
         style={styles.container}
@@ -293,8 +293,22 @@ export default function TambahSiswaModal() {
                     }}
                   >
                     <View style={styles.schoolSelectInfo}>
-                      <Text style={styles.schoolSelectName}>{sch.name}</Text>
-                      <Text style={styles.schoolSelectSub}>NPSN: {sch.npsn}</Text>
+                      <Text
+                        style={[
+                          styles.schoolSelectName,
+                          selectedSchool?.id === sch.id && styles.schoolSelectNameActive,
+                        ]}
+                      >
+                        {sch.name}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.schoolSelectSub,
+                          selectedSchool?.id === sch.id && styles.schoolSelectSubActive,
+                        ]}
+                      >
+                        NPSN: {sch.npsn}
+                      </Text>
                     </View>
                     {selectedSchool?.id === sch.id && (
                       <Ionicons name="checkmark-circle" size={22} color={Colors.primary} />
@@ -316,7 +330,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   scrollContent: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 8,
     paddingBottom: 40,
   },
   formTitle: {
@@ -324,6 +339,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.onSurface,
     marginBottom: 20,
+    letterSpacing: -0.2,
   },
   inputGroup: {
     marginBottom: 18,
@@ -333,21 +349,22 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.onSurface,
     marginBottom: 8,
+    letterSpacing: 0.1,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 14,
-    height: 48,
+    height: 52,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
   },
   multilineWrapper: {
-    height: 72,
+    height: 76,
     alignItems: 'flex-start',
-    paddingVertical: 10,
+    paddingVertical: 12,
   },
   input: {
     flex: 1,
@@ -362,9 +379,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 14,
-    height: 48,
+    height: 52,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
   },
@@ -377,12 +394,12 @@ const styles = StyleSheet.create({
   actionRow: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 24,
+    marginTop: 28,
   },
   cancelBtn: {
     flex: 1,
-    height: 48,
-    borderRadius: 12,
+    height: 52,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     backgroundColor: Colors.surfaceContainerLowest,
@@ -396,11 +413,12 @@ const styles = StyleSheet.create({
   },
   saveBtn: {
     flex: 1,
-    height: 48,
-    borderRadius: 12,
+    height: 52,
+    borderRadius: 14,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Shadows.sm,
   },
   saveBtnText: {
     fontSize: 14,
@@ -416,9 +434,9 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     backgroundColor: Colors.surfaceContainerLowest,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 20,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 24,
     maxHeight: '75%',
   },
   modalHeader: {
@@ -431,16 +449,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: Colors.onSurface,
+    letterSpacing: -0.2,
   },
   modalSearchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceContainerLow,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    height: 44,
-    borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    backgroundColor: Colors.surfaceContainerHigh,
+    borderRadius: 28,
+    paddingHorizontal: 16,
+    height: 48,
     marginBottom: 14,
   },
   modalSearchInput: {
@@ -450,7 +467,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   schoolListScroll: {
-    maxHeight: 300,
+    maxHeight: 320,
   },
   noSchoolText: {
     fontSize: 13,
@@ -464,12 +481,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 14,
     paddingHorizontal: 12,
-    borderRadius: 12,
+    borderRadius: 14,
     borderBottomWidth: 1,
     borderBottomColor: Colors.surfaceContainerHigh,
   },
   schoolSelectItemActive: {
-    backgroundColor: Colors.surfaceContainerLow,
+    backgroundColor: Colors.primaryContainer,
+    borderBottomColor: Colors.primaryContainer,
   },
   schoolSelectInfo: {
     flex: 1,
@@ -480,8 +498,14 @@ const styles = StyleSheet.create({
     color: Colors.onSurface,
     marginBottom: 2,
   },
+  schoolSelectNameActive: {
+    color: Colors.onPrimaryContainer,
+  },
   schoolSelectSub: {
     fontSize: 12,
     color: Colors.secondary,
+  },
+  schoolSelectSubActive: {
+    color: Colors.onPrimaryContainer,
   },
 });

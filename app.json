@@ -36,6 +36,15 @@
         {
           "cameraPermission": "Allow Magangku to access camera for scanning QR codes."
         }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/image.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
       ]
     ]
   }

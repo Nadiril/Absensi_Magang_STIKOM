@@ -18,40 +18,12 @@ import { Colors, Shadows } from '../../constants/theme';
 import { useApp } from '../../context/AppContext';
 import { Student } from '../../types';
 import { StudentCardSkeleton } from '../../components/Skeleton';
-import { Toast, ToastData } from '../../components/Toast';
 
 export default function StudentsScreen() {
   const router = useRouter();
-  const { students, schools, deleteStudent, deleteAllStudents, isLoading, refreshData } = useApp();
+  const { students, schools, deleteAllStudents, isLoading, refreshData } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSchool, setSelectedSchool] = useState<string>('Semua');
-  const [toast, setToast] = useState<ToastData | null>(null);
-
-  const hideToast = useCallback(() => setToast(null), []);
-
-  const handleDeleteStudent = useCallback(
-    (student: Student) => {
-      Alert.alert(
-        'Hapus Siswa',
-        `Apakah Anda yakin ingin menghapus data siswa ${student.name}?`,
-        [
-          { text: 'Batal', style: 'cancel' },
-          {
-            text: 'Hapus',
-            style: 'destructive',
-            onPress: () => {
-              deleteStudent(student.id)
-                .then(() =>
-                  setToast({ type: 'success', message: `Siswa ${student.name} berhasil dihapus` })
-                )
-                .catch(() => setToast({ type: 'error', message: 'Gagal menghapus siswa.' }));
-            },
-          },
-        ]
-      );
-    },
-    [deleteStudent]
-  );
 
   const handleClearStudents = useCallback(() => {
     Alert.alert(
@@ -117,43 +89,18 @@ export default function StudentsScreen() {
           </View>
 
           <View style={styles.cardFooter}>
-            <View style={styles.statusBadge}>
-              <View style={styles.statusDot} />
-              <Text style={styles.statusText}>{item.status || 'Aktif'}</Text>
-            </View>
             <Text style={styles.emailText}>{item.email || '-'}</Text>
           </View>
         </TouchableOpacity>
-
-        <View style={styles.cardActions}>
-          <TouchableOpacity
-            style={styles.actionBtn}
-            activeOpacity={0.7}
-            onPress={() =>
-              router.push({ pathname: '/tambah-siswa', params: { id: item.id } })
-            }
-          >
-            <Ionicons name="create-outline" size={16} color={Colors.primary} />
-            <Text style={styles.actionBtnText}>Edit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.actionBtn, styles.actionBtnDelete]}
-            activeOpacity={0.7}
-            onPress={() => handleDeleteStudent(item)}
-          >
-            <Ionicons name="trash-outline" size={16} color={Colors.error} />
-            <Text style={[styles.actionBtnText, styles.actionBtnTextDelete]}>Hapus</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     ),
-    [router, handleDeleteStudent]
+    [router]
   );
 
   const studentKeyExtractor = useCallback((item: Student, index: number) => item?.id || `std-${index}`, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       {/* Search & Filter Header */}
       <View style={styles.headerArea}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -169,7 +116,7 @@ export default function StudentsScreen() {
         </View>
 
         <View style={styles.searchContainer}>
-          <Ionicons name="search-outline" size={20} color={Colors.outline} />
+          <Ionicons name="search-outline" size={20} color={Colors.onSurfaceVariant} />
           <TextInput
             style={styles.searchInput}
             placeholder="Cari siswa berdasarkan nama / NIS..."
@@ -178,7 +125,7 @@ export default function StudentsScreen() {
             onChangeText={setSearchQuery}
           />
           {searchQuery ? (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={8}>
               <Ionicons name="close-circle" size={18} color={Colors.outline} />
             </TouchableOpacity>
           ) : null}
@@ -198,7 +145,12 @@ export default function StudentsScreen() {
                 selectedSchool === item ? styles.chipActive : null,
               ]}
               onPress={() => setSelectedSchool(item)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: selectedSchool === item }}
             >
+              {selectedSchool === item ? (
+                <Ionicons name="checkmark" size={16} color={Colors.onPrimaryContainer} />
+              ) : null}
               <Text
                 style={[
                   styles.chipText,
@@ -235,7 +187,9 @@ export default function StudentsScreen() {
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Ionicons name="person-outline" size={48} color={Colors.outline} />
+              <View style={styles.emptyIconBg}>
+                <Ionicons name="person-outline" size={32} color={Colors.primary} />
+              </View>
               <Text style={styles.emptyTitle}>Siswa tidak ditemukan</Text>
               <Text style={styles.emptySubtitle}>
                 Coba sesuaikan kata kunci pencarian atau filter sekolah.
@@ -250,11 +204,11 @@ export default function StudentsScreen() {
         style={styles.fab}
         activeOpacity={0.85}
         onPress={() => router.push('/tambah-siswa')}
+        accessibilityRole="button"
+        accessibilityLabel="Tambah siswa"
       >
         <Ionicons name="add" size={28} color={Colors.onPrimary} />
       </TouchableOpacity>
-
-      <Toast toast={toast} onHide={hideToast} />
     </SafeAreaView>
   );
 }
@@ -266,8 +220,8 @@ const styles = StyleSheet.create({
   },
   headerArea: {
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 8,
+    paddingTop: 8,
+    paddingBottom: 10,
     backgroundColor: Colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: Colors.outlineVariant,
@@ -277,6 +231,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.onSurface,
     marginBottom: 2,
+    letterSpacing: -0.3,
   },
   pageSubtitle: {
     fontSize: 13,
@@ -286,13 +241,14 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceContainerLow,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    height: 44,
-    borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: 28,
+    paddingHorizontal: 16,
+    height: 48,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: Colors.outline,
+    ...Shadows.sm,
   },
   searchInput: {
     flex: 1,
@@ -305,22 +261,29 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 9,
     borderRadius: 20,
-    backgroundColor: Colors.surfaceContainerHigh,
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderWidth: 1,
+    borderColor: Colors.outline,
     marginRight: 6,
+    ...Shadows.sm,
   },
   chipActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.primaryContainer,
+    borderColor: Colors.primaryContainer,
   },
   chipText: {
     fontSize: 13,
     fontWeight: '600',
-    color: Colors.onSurfaceVariant,
+    color: Colors.onSurface,
   },
   chipTextActive: {
-    color: Colors.onPrimary,
+    color: Colors.onPrimaryContainer,
   },
   listContent: {
     padding: 20,
@@ -328,7 +291,7 @@ const styles = StyleSheet.create({
   },
   studentCard: {
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 16,
     marginBottom: 14,
     borderWidth: 1,
@@ -341,17 +304,21 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 2,
+    borderColor: Colors.surfaceContainerHigh,
   },
   avatarFallback: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: Colors.primaryContainer,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: Colors.surfaceContainerHigh,
   },
   avatarInitial: {
     fontSize: 20,
@@ -366,6 +333,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.onSurface,
     marginBottom: 2,
+    letterSpacing: -0.1,
   },
   studentNis: {
     fontSize: 12,
@@ -379,8 +347,8 @@ const styles = StyleSheet.create({
   rateBadge: {
     alignItems: 'center',
     backgroundColor: Colors.surfaceContainer,
-    borderRadius: 12,
-    paddingHorizontal: 10,
+    borderRadius: 14,
+    paddingHorizontal: 12,
     paddingVertical: 6,
   },
   rateText: {
@@ -394,77 +362,35 @@ const styles = StyleSheet.create({
   },
   cardFooter: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: Colors.surfaceContainerHigh,
   },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.tertiaryContainer,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 6,
-  },
-  statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: Colors.onTertiaryContainer,
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: Colors.onTertiaryContainer,
-  },
   emailText: {
     fontSize: 12,
     color: Colors.secondary,
-  },
-  cardActions: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: Colors.surfaceContainerLow,
-  },
-  actionBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    height: 38,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.outlineVariant,
-    backgroundColor: Colors.surfaceContainerLow,
-  },
-  actionBtnDelete: {
-    backgroundColor: '#fef2f2',
-    borderColor: Colors.errorContainer,
-  },
-  actionBtnText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.primary,
-  },
-  actionBtnTextDelete: {
-    color: Colors.error,
   },
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 60,
+    paddingHorizontal: 24,
+  },
+  emptyIconBg: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: Colors.surfaceContainerHigh,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
   },
   emptyTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
     color: Colors.onSurface,
     marginTop: 12,
     marginBottom: 4,
@@ -473,6 +399,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.secondary,
     textAlign: 'center',
+    lineHeight: 18,
   },
   fab: {
     position: 'absolute',
@@ -480,7 +407,7 @@ const styles = StyleSheet.create({
     bottom: 24,
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: 18,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',

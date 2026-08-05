@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   RefreshControl,
   Platform,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,39 +16,11 @@ import { Colors, Shadows } from '../../constants/theme';
 import { useApp } from '../../context/AppContext';
 import { School } from '../../types';
 import { SchoolCardSkeleton } from '../../components/Skeleton';
-import { Toast, ToastData } from '../../components/Toast';
 
 export default function SchoolsScreen() {
   const router = useRouter();
-  const { schools, deleteSchool, isLoading, refreshData } = useApp();
+  const { schools, isLoading, refreshData } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
-  const [toast, setToast] = useState<ToastData | null>(null);
-
-  const hideToast = useCallback(() => setToast(null), []);
-
-  const handleDeleteSchool = useCallback(
-    (school: School) => {
-      Alert.alert(
-        'Hapus Sekolah',
-        `Apakah Anda yakin ingin menghapus data sekolah ${school.name}?`,
-        [
-          { text: 'Batal', style: 'cancel' },
-          {
-            text: 'Hapus',
-            style: 'destructive',
-            onPress: () => {
-              deleteSchool(school.id)
-                .then(() =>
-                  setToast({ type: 'success', message: `Sekolah ${school.name} berhasil dihapus` })
-                )
-                .catch(() => setToast({ type: 'error', message: 'Gagal menghapus sekolah.' }));
-            },
-          },
-        ]
-      );
-    },
-    [deleteSchool]
-  );
 
   const filteredSchools = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -79,11 +50,6 @@ export default function SchoolsScreen() {
               <Text style={styles.schoolName}>{item.name || 'Tanpa Nama'}</Text>
               <Text style={styles.npsnText}>NPSN: {item.npsn || '-'}</Text>
             </View>
-
-            <View style={styles.statusChip}>
-              <View style={styles.statusDot} />
-              <Text style={styles.statusChipText}>{item.status || 'Aktif'}</Text>
-            </View>
           </View>
 
           <View style={styles.addressRow}>
@@ -106,43 +72,22 @@ export default function SchoolsScreen() {
             </View>
           </View>
         </TouchableOpacity>
-
-        <View style={styles.cardActions}>
-          <TouchableOpacity
-            style={styles.actionBtn}
-            activeOpacity={0.7}
-            onPress={() =>
-              router.push({ pathname: '/tambah-sekolah', params: { id: item.id } })
-            }
-          >
-            <Ionicons name="create-outline" size={16} color={Colors.primary} />
-            <Text style={styles.actionBtnText}>Edit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.actionBtn, styles.actionBtnDelete]}
-            activeOpacity={0.7}
-            onPress={() => handleDeleteSchool(item)}
-          >
-            <Ionicons name="trash-outline" size={16} color={Colors.error} />
-            <Text style={[styles.actionBtnText, styles.actionBtnTextDelete]}>Hapus</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     ),
-    [router, handleDeleteSchool]
+    [router]
   );
 
   const schoolKeyExtractor = useCallback((item: School, index: number) => item?.id || `sch-${index}`, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       {/* Search Bar Header */}
       <View style={styles.headerArea}>
         <Text style={styles.pageTitle}>Data Sekolah</Text>
         <Text style={styles.pageSubtitle}>Daftar sekolah mitra dan direktori institusi</Text>
 
         <View style={styles.searchContainer}>
-          <Ionicons name="search-outline" size={20} color={Colors.outline} />
+          <Ionicons name="search-outline" size={20} color={Colors.onSurfaceVariant} />
           <TextInput
             style={styles.searchInput}
             placeholder="Cari nama sekolah / alamat / No. HP..."
@@ -151,7 +96,7 @@ export default function SchoolsScreen() {
             onChangeText={setSearchQuery}
           />
           {searchQuery ? (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <TouchableOpacity onPress={() => setSearchQuery('')} hitSlop={8}>
               <Ionicons name="close-circle" size={18} color={Colors.outline} />
             </TouchableOpacity>
           ) : null}
@@ -181,7 +126,9 @@ export default function SchoolsScreen() {
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Ionicons name="business-outline" size={48} color={Colors.outline} />
+              <View style={styles.emptyIconBg}>
+                <Ionicons name="business-outline" size={32} color={Colors.primary} />
+              </View>
               <Text style={styles.emptyTitle}>Sekolah tidak ditemukan</Text>
               <Text style={styles.emptySubtitle}>
                 Coba gunakan kata kunci nama atau NPSN sekolah yang berbeda.
@@ -196,11 +143,11 @@ export default function SchoolsScreen() {
         style={styles.fab}
         activeOpacity={0.85}
         onPress={() => router.push('/tambah-sekolah')}
+        accessibilityRole="button"
+        accessibilityLabel="Tambah sekolah"
       >
         <Ionicons name="add" size={28} color={Colors.onPrimary} />
       </TouchableOpacity>
-
-      <Toast toast={toast} onHide={hideToast} />
     </SafeAreaView>
   );
 }
@@ -212,7 +159,8 @@ const styles = StyleSheet.create({
   },
   headerArea: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingTop: 8,
+    paddingBottom: 12,
     backgroundColor: Colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: Colors.outlineVariant,
@@ -222,6 +170,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.onSurface,
     marginBottom: 2,
+    letterSpacing: -0.3,
   },
   pageSubtitle: {
     fontSize: 13,
@@ -231,12 +180,13 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceContainerLow,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    height: 44,
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: 28,
+    paddingHorizontal: 16,
+    height: 48,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: Colors.outline,
+    ...Shadows.sm,
   },
   searchInput: {
     flex: 1,
@@ -250,7 +200,7 @@ const styles = StyleSheet.create({
   },
   schoolCard: {
     backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 16,
     marginBottom: 14,
     borderWidth: 1,
@@ -264,9 +214,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   iconBg: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     backgroundColor: Colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center',
@@ -283,26 +233,6 @@ const styles = StyleSheet.create({
   npsnText: {
     fontSize: 12,
     color: Colors.secondary,
-  },
-  statusChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.tertiaryContainer,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 4,
-  },
-  statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: Colors.onTertiaryContainer,
-  },
-  statusChipText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: Colors.onTertiaryContainer,
   },
   addressRow: {
     flexDirection: 'row',
@@ -333,46 +263,24 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.secondary,
   },
-  cardActions: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: Colors.surfaceContainerLow,
-  },
-  actionBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    height: 38,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.outlineVariant,
-    backgroundColor: Colors.surfaceContainerLow,
-  },
-  actionBtnDelete: {
-    backgroundColor: '#fef2f2',
-    borderColor: Colors.errorContainer,
-  },
-  actionBtnText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.primary,
-  },
-  actionBtnTextDelete: {
-    color: Colors.error,
-  },
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 60,
+    paddingHorizontal: 24,
+  },
+  emptyIconBg: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: Colors.surfaceContainerHigh,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
   },
   emptyTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
     color: Colors.onSurface,
     marginTop: 12,
     marginBottom: 4,
@@ -381,6 +289,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.secondary,
     textAlign: 'center',
+    lineHeight: 18,
   },
   fab: {
     position: 'absolute',
@@ -388,7 +297,7 @@ const styles = StyleSheet.create({
     bottom: 24,
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: 18,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',

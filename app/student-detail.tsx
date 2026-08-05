@@ -63,7 +63,7 @@ export default function StudentDetailScreen() {
 
   if (!student) {
     return (
-      <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
         <View style={styles.notFoundContainer}>
           <Ionicons name="alert-circle-outline" size={60} color={Colors.error} />
           <Text style={styles.notFoundTitle}>Siswa Tidak Ditemukan</Text>
@@ -92,11 +92,6 @@ export default function StudentDetailScreen() {
           <Text style={styles.studentNis}>NIS: {student.nis}</Text>
           
           <View style={styles.badgeRow}>
-            <View style={styles.statusBadge}>
-              <View style={styles.statusDot} />
-              <Text style={styles.statusText}>{student.status}</Text>
-            </View>
-            
             <View style={styles.rateBadge}>
               <Text style={styles.rateText}>{student.attendanceRate}% Kehadiran</Text>
             </View>
@@ -130,42 +125,28 @@ export default function StudentDetailScreen() {
           </View>
 
           <View style={styles.infoRow}>
-            <Ionicons name="school-outline" size={20} color={Colors.outline} />
+            <Ionicons name="home-outline" size={20} color={Colors.outline} />
             <View style={styles.infoTextGroup}>
-              <Text style={styles.infoLabel}>Kelas & Jurusan</Text>
-              <Text style={styles.infoValue}>{student.classGrade}</Text>
+              <Text style={styles.infoLabel}>Domisili Siswa</Text>
+              <Text style={styles.infoValue}>{student.domisili || '-'}</Text>
             </View>
           </View>
 
-          {student.domisili ? (
-            <View style={styles.infoRow}>
-              <Ionicons name="home-outline" size={20} color={Colors.outline} />
-              <View style={styles.infoTextGroup}>
-                <Text style={styles.infoLabel}>Domisili Siswa</Text>
-                <Text style={styles.infoValue}>{student.domisili}</Text>
-              </View>
+          <View style={styles.infoRow}>
+            <Ionicons name="call-outline" size={20} color={Colors.outline} />
+            <View style={styles.infoTextGroup}>
+              <Text style={styles.infoLabel}>No. HP Siswa</Text>
+              <Text style={styles.infoValue}>{student.studentPhone || '-'}</Text>
             </View>
-          ) : null}
+          </View>
 
-          {student.studentPhone ? (
-            <View style={styles.infoRow}>
-              <Ionicons name="call-outline" size={20} color={Colors.outline} />
-              <View style={styles.infoTextGroup}>
-                <Text style={styles.infoLabel}>No. HP Siswa</Text>
-                <Text style={styles.infoValue}>{student.studentPhone}</Text>
-              </View>
+          <View style={styles.infoRow}>
+            <Ionicons name="people-outline" size={20} color={Colors.outline} />
+            <View style={styles.infoTextGroup}>
+              <Text style={styles.infoLabel}>No. HP Wali Siswa</Text>
+              <Text style={styles.infoValue}>{student.guardianPhone || '-'}</Text>
             </View>
-          ) : null}
-
-          {student.guardianPhone ? (
-            <View style={styles.infoRow}>
-              <Ionicons name="people-outline" size={20} color={Colors.outline} />
-              <View style={styles.infoTextGroup}>
-                <Text style={styles.infoLabel}>No. HP Wali Siswa</Text>
-                <Text style={styles.infoValue}>{student.guardianPhone}</Text>
-              </View>
-            </View>
-          ) : null}
+          </View>
         </View>
 
         {/* Attendance History */}
@@ -214,7 +195,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   scrollContent: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 8,
     paddingBottom: 40,
   },
   notFoundContainer: {
@@ -234,7 +216,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 14,
   },
   backBtnText: {
     color: Colors.onPrimary,
@@ -243,7 +225,7 @@ const styles = StyleSheet.create({
   profileCard: {
     backgroundColor: Colors.surfaceContainerLowest,
     borderRadius: 20,
-    padding: 20,
+    padding: 24,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
@@ -251,19 +233,23 @@ const styles = StyleSheet.create({
     ...Shadows.sm,
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 84,
+    height: 84,
+    borderRadius: 42,
     marginBottom: 12,
+    borderWidth: 3,
+    borderColor: Colors.primaryContainer,
   },
   avatarFallback: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 84,
+    height: 84,
+    borderRadius: 42,
     backgroundColor: Colors.primaryContainer,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
+    borderWidth: 3,
+    borderColor: Colors.primaryFixed,
   },
   avatarInitial: {
     fontSize: 32,
@@ -275,6 +261,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.onSurface,
     marginBottom: 4,
+    letterSpacing: -0.2,
   },
   studentNis: {
     fontSize: 13,
@@ -284,26 +271,6 @@ const styles = StyleSheet.create({
   badgeRow: {
     flexDirection: 'row',
     gap: 8,
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.tertiaryContainer,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 14,
-    gap: 6,
-  },
-  statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: Colors.onTertiaryContainer,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: Colors.onTertiaryContainer,
   },
   rateBadge: {
     backgroundColor: Colors.primaryContainer,
@@ -336,26 +303,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: Colors.onSurface,
+    letterSpacing: -0.1,
   },
   qrSubtitle: {
     fontSize: 12,
     color: Colors.secondary,
     textAlign: 'center',
     marginBottom: 16,
+    lineHeight: 17,
   },
   qrBox: {
     backgroundColor: '#ffffff',
-    padding: 16,
-    borderRadius: 16,
+    padding: 20,
+    borderRadius: 20,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
+    ...Shadows.sm,
   },
   qrNisText: {
     fontSize: 14,
     fontWeight: '700',
     color: Colors.onSurface,
-    marginTop: 8,
+    marginTop: 10,
   },
   infoCard: {
     backgroundColor: Colors.surfaceContainerLowest,
@@ -371,6 +341,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.onSurface,
     marginBottom: 16,
+    letterSpacing: -0.1,
   },
   infoRow: {
     flexDirection: 'row',
@@ -409,7 +380,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: Colors.surfaceContainerHigh,
   },
@@ -429,13 +400,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 48,
-    borderRadius: 14,
+    height: 52,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     backgroundColor: Colors.surfaceContainerLowest,
     gap: 8,
     marginBottom: 12,
+    ...Shadows.sm,
   },
   editBtnText: {
     fontSize: 14,
@@ -446,16 +418,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 48,
-    borderRadius: 14,
+    height: 52,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: Colors.errorContainer,
-    backgroundColor: '#fef2f2',
+    backgroundColor: Colors.errorContainer,
     gap: 8,
   },
   deleteBtnText: {
     fontSize: 14,
     fontWeight: '700',
-    color: Colors.error,
+    color: Colors.onErrorContainer,
   },
 });
