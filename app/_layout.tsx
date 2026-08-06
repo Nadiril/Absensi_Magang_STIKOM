@@ -63,6 +63,13 @@ function RootNavigator() {
             headerStyle: { backgroundColor: Colors.surface },
           }}
         />
+        <Stack.Screen
+          name="pengaturan"
+          options={{
+            title: 'Pengaturan Presensi',
+            headerStyle: { backgroundColor: Colors.surface },
+          }}
+        />
       </Stack>
     </>
   );

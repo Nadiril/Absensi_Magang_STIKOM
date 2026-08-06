@@ -1,9 +1,18 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Student, School, AttendanceRecord, ActivityLog } from '../types';
+import { Student, School, AttendanceRecord, ActivityLog, AttendanceSettings } from '../types';
 import { isSupabaseConfigured } from '../lib/supabase';
+import { genId } from '../lib/id';
 import { schoolService } from '../services/schoolService';
 import { studentService } from '../services/studentService';
+import { attendanceService } from '../services/attendanceService';
+
+const formatShortDate = (iso: string): string =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 
 interface AppContextType {
   students: Student[];
@@ -24,7 +33,14 @@ interface AppContextType {
   updateSchool: (id: string, data: Partial<School>) => Promise<void>;
   deleteSchool: (id: string) => Promise<void>;
   deleteAllSchools: () => Promise<void>;
-  recordAttendance: (nisOrId: string) => { success: boolean; message: string; student?: Student };
+  recordAttendance: (nisOrId: string) => Promise<{
+    success: boolean;
+    message: string;
+    student?: Student;
+    type?: 'Check-In' | 'Check-Out';
+  }>;
+  settings: AttendanceSettings;
+  updateSettings: (data: Partial<AttendanceSettings>) => Promise<void>;
   clearAllData: () => Promise<void>;
   refreshData: () => Promise<void>;
 }
@@ -35,16 +51,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [students, setStudents] = useState<Student[]>([]);
   const [schools, setSchools] = useState<School[]>([]);
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
-  const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSupabaseActive, setIsSupabaseActive] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isAuthReady, setIsAuthReady] = useState<boolean>(false);
+  const [settings, setSettings] = useState<AttendanceSettings>({ checkInLimit: '08:00' });
 
   useEffect(() => {
     AsyncStorage.getItem('@magangku_auth')
-      .then((saved) => {
-        if (saved === 'logged-in') setIsLoggedIn(true);
+      .then(() => {
+        setIsLoggedIn(true);
       })
       .catch(() => {})
       .finally(() => setIsAuthReady(true));
@@ -68,6 +84,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         console.error('Error fetching data from Supabase, fallback to AsyncStorage:', err);
         await loadFromAsyncStorage();
       }
+
+      try {
+        const fetchedAttendance = await attendanceService.getAttendanceRecords();
+        setAttendanceRecords(fetchedAttendance);
+      } catch (err) {
+        console.error('Error fetching attendance records from Supabase:', err);
+      }
+
+      try {
+        const fetchedSettings = await attendanceService.getSettings();
+        if (fetchedSettings) {
+          setSettings(fetchedSettings);
+        } else {
+          attendanceService
+            .upsertSettings({ checkInLimit: '08:00' })
+            .catch((err) => console.error('Failed to seed settings to Supabase:', err));
+        }
+      } catch (err) {
+        console.error('Error fetching settings from Supabase:', err);
+      }
     } else {
       await loadFromAsyncStorage();
     }
@@ -79,10 +115,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const savedStudents = await AsyncStorage.getItem('@magangku_students');
       const savedSchools = await AsyncStorage.getItem('@magangku_schools');
       const savedAttendance = await AsyncStorage.getItem('@magangku_attendance');
+      const savedSettings = await AsyncStorage.getItem('@magangku_settings');
 
       if (savedStudents) setStudents(JSON.parse(savedStudents));
       if (savedSchools) setSchools(JSON.parse(savedSchools));
       if (savedAttendance) setAttendanceRecords(JSON.parse(savedAttendance));
+      if (savedSettings) {
+        const parsed = JSON.parse(savedSettings);
+        setSettings({ checkInLimit: '08:00', ...parsed });
+      }
     } catch (e) {
       console.error('Failed to load state from AsyncStorage', e);
     }
@@ -116,6 +157,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => clearTimeout(t);
   }, [attendanceRecords]);
 
+  const activities = useMemo<ActivityLog[]>(
+    () => {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      return attendanceRecords.map((r) => ({
+        id: `act-${r.id}`,
+        title: r.type === 'Check-In' ? 'Presensi Hadir' : 'Presensi Pulang',
+        subtitle: `Siswa: ${r.studentName} - NIS: ${r.nis}`,
+        time: `${r.date === todayStr ? 'Hari ini' : formatShortDate(r.date)}, ${r.timestamp}`,
+        icon: 'checkmark-circle',
+        colorType: r.type === 'Check-In' ? 'tertiary' : 'primary',
+      }));
+    },
+    [attendanceRecords]
+  );
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      AsyncStorage.setItem('@magangku_settings', JSON.stringify(settings)).catch(() => {});
+    }, 300);
+    return () => clearTimeout(t);
+  }, [settings]);
+
   // CRUD Actions
   const addStudent = useCallback(
     async (newStudentData: Omit<Student, 'id'>) => {
@@ -132,7 +195,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           throw err;
         }
       } else {
-        const id = `std-${Date.now()}`;
+        const id = genId('std');
         const newStudent: Student = { ...newStudentData, id };
         setStudents((prev) => [newStudent, ...prev]);
 
@@ -144,18 +207,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           )
         );
       }
-
-      setActivities((prev) => [
-        {
-          id: `act-${Date.now()}`,
-          title: 'Siswa Baru Terdaftar',
-          subtitle: `${newStudentData.name} - ${newStudentData.schoolName}`,
-          time: 'Baru saja',
-          icon: 'person-add',
-          colorType: 'primary',
-        },
-        ...prev,
-      ]);
     },
     [isSupabaseActive]
   );
@@ -246,22 +297,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           throw err;
         }
       } else {
-        const id = `sch-${Date.now()}`;
+        const id = genId('sch');
         const newSchool: School = { ...newSchoolData, id };
         setSchools((prev) => [newSchool, ...prev]);
       }
-
-      setActivities((prev) => [
-        {
-          id: `act-${Date.now()}`,
-          title: 'Sekolah Baru Ditambahkan',
-          subtitle: newSchoolData.name,
-          time: 'Baru saja',
-          icon: 'school',
-          colorType: 'surface',
-        },
-        ...prev,
-      ]);
     },
     [isSupabaseActive]
   );
@@ -324,7 +363,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [isSupabaseActive]);
 
   const recordAttendance = useCallback(
-    (nisOrId: string) => {
+    async (nisOrId: string) => {
       const target = students.find(
         (s) => s.nis.toLowerCase() === nisOrId.trim().toLowerCase() || s.id === nisOrId.trim()
       );
@@ -337,40 +376,77 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       const now = new Date();
+      const dateStr = now.toISOString().slice(0, 10);
       const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      const compareTime = `${String(now.getHours()).padStart(2, '0')}:${String(
+        now.getMinutes()
+      ).padStart(2, '0')}`;
+
+      const todayRecords = attendanceRecords.filter(
+        (r) => r.studentId === target.id && r.date === dateStr
+      );
+      const hasCheckIn = todayRecords.some((r) => r.type === 'Check-In');
+      const hasCheckOut = todayRecords.some((r) => r.type === 'Check-Out');
+
+      if (hasCheckIn && hasCheckOut) {
+        return {
+          success: false,
+          message: `${target.name} sudah absen masuk & pulang hari ini.`,
+        };
+      }
+
+      const type: 'Check-In' | 'Check-Out' = hasCheckIn ? 'Check-Out' : 'Check-In';
+      const status: 'Hadir' | 'Terlambat' =
+        type === 'Check-In' && compareTime > settings.checkInLimit ? 'Terlambat' : 'Hadir';
 
       const newRecord: AttendanceRecord = {
-        id: `att-${Date.now()}`,
+        id: genId('att'),
         studentId: target.id,
         studentName: target.name,
         schoolName: target.schoolName,
         nis: target.nis,
+        date: dateStr,
         timestamp: timeStr,
-        type: 'Check-In',
-        status: 'Hadir',
+        type,
+        status,
       };
 
       setAttendanceRecords((prev) => [newRecord, ...prev]);
 
-      setActivities((prev) => [
-        {
-          id: `act-${Date.now()}`,
-          title: 'Presensi Berhasil',
-          subtitle: `Siswa: ${target.name} - NIS: ${target.nis}`,
-          time: `Hari ini, ${timeStr}`,
-          icon: 'checkmark-circle',
-          colorType: 'tertiary',
-        },
-        ...prev,
-      ]);
+      if (isSupabaseActive) {
+        try {
+          await attendanceService.insertAttendanceRecord(newRecord);
+        } catch (err) {
+          console.error('Failed to sync attendance record to Supabase:', err);
+        }
+      }
 
       return {
         success: true,
-        message: `Presensi berhasil untuk ${target.name} (${target.schoolName})`,
+        message:
+          type === 'Check-In'
+            ? `Check-in berhasil untuk ${target.name} (${target.schoolName})`
+            : `Check-out berhasil untuk ${target.name}. Terima kasih!`,
         student: target,
+        type,
       };
     },
-    [students]
+    [students, attendanceRecords, settings, isSupabaseActive]
+  );
+
+  const updateSettings = useCallback(
+    async (data: Partial<AttendanceSettings>) => {
+      setSettings((prev) => {
+        const next = { ...prev, ...data };
+        if (isSupabaseActive) {
+          attendanceService
+            .upsertSettings(next)
+            .catch((err) => console.error('Failed to sync settings to Supabase:', err));
+        }
+        return next;
+      });
+    },
+    [isSupabaseActive]
   );
 
   const clearAllData = useCallback(async () => {
@@ -386,7 +462,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setStudents([]);
     setSchools([]);
     setAttendanceRecords([]);
-    setActivities([]);
     try {
       await AsyncStorage.multiRemove(['@magangku_students', '@magangku_schools', '@magangku_attendance']);
     } catch (e) {
@@ -430,6 +505,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       deleteSchool,
       deleteAllSchools,
       recordAttendance,
+      settings,
+      updateSettings,
       clearAllData,
       refreshData,
     }),
@@ -449,6 +526,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       deleteSchool,
       deleteAllSchools,
       recordAttendance,
+      settings,
+      updateSettings,
       clearAllData,
       refreshData,
       isLoggedIn,

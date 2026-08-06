@@ -45,14 +45,13 @@ const StudentRow = memo(function StudentRow({
           <View style={styles.studentInfo}>
             <Text style={styles.studentName}>{item.name || 'Tanpa Nama'}</Text>
             <Text style={styles.studentNis}>NIS: {item.nis || '-'}</Text>
-            <Text style={styles.studentSchool}>
-              {item.schoolName || 'Sekolah'} • {item.classGrade || '-'}
-            </Text>
+            <Text style={styles.studentSchool}>{item.schoolName || 'Sekolah'}</Text>
           </View>
         </View>
 
         <View style={styles.cardFooter}>
-          <Text style={styles.emailText}>{item.email || '-'}</Text>
+          <Ionicons name="call-outline" size={13} color={Colors.secondary} />
+          <Text style={styles.phoneText}>{item.studentPhone || '-'}</Text>
         </View>
       </TouchableOpacity>
     </View>
@@ -403,12 +402,13 @@ const createStudentRowStyles = (Colors: ThemeColors) =>
       flexDirection: 'row',
       justifyContent: 'flex-end',
       alignItems: 'center',
+      gap: 4,
       marginTop: 12,
       paddingTop: 12,
       borderTopWidth: 1,
       borderTopColor: Colors.surfaceContainerHigh,
     },
-    emailText: {
+    phoneText: {
       fontSize: 12,
       color: Colors.secondary,
     },

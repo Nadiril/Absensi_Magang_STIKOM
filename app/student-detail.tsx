@@ -11,10 +11,23 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import QRCode from 'react-native-qrcode-svg';
+import ViewShot from 'react-native-view-shot';
+import * as Sharing from 'expo-sharing';
 import { Shadows, ThemeColors } from '../constants/theme';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
+import { AttendanceRecord } from '../types';
 import { Toast, ToastData } from '../components/Toast';
+
+const formatLongDate = (iso?: string): string =>
+  iso
+    ? new Date(`${iso}T00:00:00`).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+    : '';
 
 export default function StudentDetailScreen() {
   const router = useRouter();
@@ -25,6 +38,8 @@ export default function StudentDetailScreen() {
 
   const [toast, setToast] = useState<ToastData | null>(null);
   const backTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const qrShotRef = useRef<ViewShot>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -39,6 +54,18 @@ export default function StudentDetailScreen() {
   const studentHistory = useMemo(() => {
     if (!student) return [];
     return attendanceRecords.filter((r) => r.studentId === student.id || r.nis === student.nis);
+  }, [attendanceRecords, student]);
+
+  const todaySession = useMemo(() => {
+    if (!student) return { checkIn: null as AttendanceRecord | null, checkOut: null as AttendanceRecord | null };
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const todays = attendanceRecords.filter(
+      (r) => r.date === todayStr && (r.studentId === student.id || r.nis === student.nis)
+    );
+    return {
+      checkIn: todays.find((r) => r.type === 'Check-In') ?? null,
+      checkOut: todays.find((r) => r.type === 'Check-Out') ?? null,
+    };
   }, [attendanceRecords, student]);
 
   const handleDelete = useCallback(() => {
@@ -63,6 +90,28 @@ export default function StudentDetailScreen() {
       ]
     );
   }, [student, deleteStudent, router]);
+
+  const handleExportQr = useCallback(async () => {
+    if (!student || isExporting) return;
+    try {
+      setIsExporting(true);
+      if (!(await Sharing.isAvailableAsync())) {
+        setToast({ type: 'error', message: 'Fitur berbagi tidak tersedia di perangkat ini.' });
+        return;
+      }
+      const uri = await qrShotRef.current?.capture?.();
+      if (!uri) throw new Error('capture failed');
+      await Sharing.shareAsync(uri, {
+        mimeType: 'image/png',
+        dialogTitle: `Kartu QR - ${student.name} (${student.nis})`,
+        UTI: 'public.png',
+      });
+    } catch {
+      setToast({ type: 'error', message: 'Gagal membuat kartu QR. Coba lagi.' });
+    } finally {
+      setIsExporting(false);
+    }
+  }, [student, isExporting]);
 
   if (!student) {
     return (
@@ -101,6 +150,40 @@ export default function StudentDetailScreen() {
           </View>
         </View>
 
+        {/* Today Session Status */}
+        <View style={styles.sessionCard}>
+          <View style={styles.sessionRow}>
+            <View style={[styles.sessionPill, todaySession.checkIn ? styles.sessionPillDone : null]}>
+              <Ionicons
+                name={todaySession.checkIn ? 'log-in' : 'log-in-outline'}
+                size={16}
+                color={todaySession.checkIn ? Colors.onPrimaryContainer : Colors.secondary}
+              />
+              <Text style={[styles.sessionPillText, todaySession.checkIn && { color: Colors.onPrimaryContainer }]}>
+                Hadir {todaySession.checkIn ? todaySession.checkIn.timestamp : '—'}
+              </Text>
+            </View>
+            <Ionicons name="arrow-forward" size={14} color={Colors.outline} />
+            <View style={[styles.sessionPill, todaySession.checkOut ? styles.sessionPillDone : null]}>
+              <Ionicons
+                name={todaySession.checkOut ? 'log-out' : 'log-out-outline'}
+                size={16}
+                color={todaySession.checkOut ? Colors.onPrimaryContainer : Colors.secondary}
+              />
+              <Text style={[styles.sessionPillText, todaySession.checkOut && { color: Colors.onPrimaryContainer }]}>
+                Pulang {todaySession.checkOut ? todaySession.checkOut.timestamp : '—'}
+              </Text>
+            </View>
+          </View>
+          <Text style={styles.sessionHint}>
+            {!todaySession.checkIn
+              ? 'Belum absen hari ini. Scan QR siswa untuk check-in.'
+              : todaySession.checkIn && !todaySession.checkOut
+              ? 'Sudah check-in. Scan lagi untuk check-out saat pulang.'
+              : 'Sesi presensi hari ini selesai (hadir & pulang).'}
+          </Text>
+        </View>
+
         {/* QR Code Virtual Card */}
         <View style={styles.qrCard}>
           <View style={styles.qrHeader}>
@@ -109,10 +192,26 @@ export default function StudentDetailScreen() {
           </View>
           <Text style={styles.qrSubtitle}>Tunjukkan QR Code ini ke kamera presensi saat masuk/pulang</Text>
           
-          <View style={styles.qrBox}>
-            <Ionicons name="qr-code" size={140} color={Colors.onSurface} />
+          <ViewShot ref={qrShotRef} options={{ format: 'png', quality: 1 }} style={styles.qrBox}>
+            <QRCode value={student.nis} size={160} quietZone={8} />
             <Text style={styles.qrNisText}>NIS: {student.nis}</Text>
-          </View>
+          </ViewShot>
+
+          <TouchableOpacity
+            style={[styles.exportBtn, isExporting && { opacity: 0.7 }]}
+            activeOpacity={0.8}
+            onPress={handleExportQr}
+            disabled={isExporting}
+          >
+            <Ionicons
+              name={isExporting ? 'hourglass-outline' : 'download-outline'}
+              size={18}
+              color={Colors.onPrimaryContainer}
+            />
+            <Text style={styles.exportBtnText}>
+              {isExporting ? 'Menyiapkan...' : 'Unduh / Cetak Kartu QR'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* Details Information */}
@@ -132,6 +231,20 @@ export default function StudentDetailScreen() {
             <View style={styles.infoTextGroup}>
               <Text style={styles.infoLabel}>Domisili Siswa</Text>
               <Text style={styles.infoValue}>{student.domisili || '-'}</Text>
+            </View>
+          </View>
+
+          <View style={styles.infoRow}>
+            <Ionicons name="calendar-outline" size={20} color={Colors.outline} />
+            <View style={styles.infoTextGroup}>
+              <Text style={styles.infoLabel}>Periode Magang</Text>
+              <Text style={styles.infoValue}>
+                {student.startDate || student.endDate
+                  ? formatLongDate(student.startDate) || 'Belum diatur'
+                  : 'Belum diatur'}
+                {student.startDate && student.endDate ? ' — ' : ''}
+                {student.endDate ? formatLongDate(student.endDate) : ''}
+              </Text>
             </View>
           </View>
 
@@ -157,7 +270,7 @@ export default function StudentDetailScreen() {
           <Text style={styles.infoSectionTitle}>Riwayat Presensi ({studentHistory.length})</Text>
 
           {studentHistory.length === 0 ? (
-            <Text style={styles.emptyHistory}>Belum ada riwayat presensi tercatat hari ini.</Text>
+            <Text style={styles.emptyHistory}>Belum ada riwayat presensi tercatat.</Text>
           ) : (
             studentHistory.map((rec) => (
               <View key={rec.id} style={styles.historyItem}>
@@ -287,6 +400,45 @@ const createStyles = (Colors: ThemeColors) =>
     fontWeight: '600',
     color: Colors.onPrimaryContainer,
   },
+  sessionCard: {
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant,
+    marginBottom: 16,
+    ...Shadows.sm,
+  },
+  sessionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginBottom: 10,
+  },
+  sessionPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: Colors.surfaceContainerHigh,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 14,
+    flex: 1,
+  },
+  sessionPillDone: {
+    backgroundColor: Colors.primaryContainer,
+  },
+  sessionPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.secondary,
+  },
+  sessionHint: {
+    fontSize: 12,
+    color: Colors.secondary,
+    lineHeight: 17,
+  },
   qrCard: {
     backgroundColor: Colors.surfaceContainerLowest,
     borderRadius: 20,
@@ -330,6 +482,24 @@ const createStyles = (Colors: ThemeColors) =>
     fontWeight: '700',
     color: Colors.onSurface,
     marginTop: 10,
+  },
+  exportBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 48,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.primaryContainer,
+    backgroundColor: Colors.primaryContainer,
+    gap: 8,
+    marginTop: 16,
+    alignSelf: 'stretch',
+  },
+  exportBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.onPrimaryContainer,
   },
   infoCard: {
     backgroundColor: Colors.surfaceContainerLowest,

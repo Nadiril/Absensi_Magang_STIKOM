@@ -2,7 +2,7 @@
 
 Aplikasi **presensi siswa magang berbasis QR Code** yang dibangun dengan Expo (React Native). Siswa menampilkan kartu QR, admin memindai QR tersebut untuk mencatat kehadiran, serta mengelola data siswa dan sekolah mitra secara lengkap (CRUD).
 
-> ⚠️ **Status: Pengembangan Awal (v1.2.0)** — Fitur masih terus dikembangkan dan disempurnakan.
+> ⚠️ **Status: Pengembangan Awal (v1.4.2)** — Fitur masih terus dikembangkan dan disempurnakan.
 
 ---
 
@@ -17,6 +17,8 @@ Aplikasi **presensi siswa magang berbasis QR Code** yang dibangun dengan Expo (R
 | 🏫 **Data Sekolah (CRUD)** | Tambah, **edit**, hapus, pencarian, status sekolah mitra |
 | 📊 **Beranda / Dashboard** | Statistik persentase kehadiran, grid ringkasan (total presensi, terlambat, siswa aktif), aktivitas terbaru |
 | 🕐 **Riwayat Presensi** | Riwayat kehadiran per siswa |
+| 🔁 **Check-in / Check-out** | Dua sesi otomatis (masuk & pulang), status Hadir/Terlambat per batas jam, badge sesi hari ini |
+| ⚙️ **Pengaturan Presensi** | Atur jam batas check-in dari menu Profil |
 | 🔔 **Notifikasi Toast** | Feedback sukses / gagal pada semua aksi simpan & hapus |
 | 📴 **Mode Offline** | Fallback ke `AsyncStorage` saat Supabase tidak dikonfigurasi / offline |
 
@@ -58,6 +60,7 @@ AbsensiMagang/
 │   ├── auth-loading.tsx    # Loading transisi autentikasi
 │   ├── tambah-siswa.tsx    # Form tambah / edit siswa
 │   ├── tambah-sekolah.tsx  # Form tambah / edit sekolah
+│   ├── pengaturan.tsx      # Pengaturan presensi (jam batas check-in)
 │   └── student-detail.tsx  # Detail siswa + kartu QR + riwayat
 ├── components/             # Komponen reusable (Toast, Skeleton, dll)
 ├── constants/              # Tema & palet warna (light / sunset)
@@ -124,12 +127,14 @@ Lalu pilih salah satu opsi di terminal:
 
 ## 🗄️ Skema Database
 
-Jalankan `sql/crud_siswa_sekolah.sql` di **Supabase Dashboard → SQL Editor**.
+Jalankan `sql/setup_lengkap.sql` di **Supabase Dashboard → SQL Editor**.
 
 Tabel utama:
 
 - **`schools`** — data sekolah mitra (nama, NPSN, alamat, email, telepon, status)
-- **`students`** — data siswa (NIS, nama, relasi ke sekolah, domisili, kontak, status)
+- **`students`** — data siswa (NIS, nama, relasi ke sekolah, domisili, kontak, status) + periode magang (`start_date`/`end_date`)
+- **`attendance_records`** — rekam presensi masuk/pulang (tanggal, jam, tipe `Check-In`/`Check-Out`, status `Hadir`/`Terlambat`)
+- **`app_settings`** — pengaturan key-value (mis. jam batas check-in `check_in_limit`, default `08:00`)
 - RLS aktif dengan kebijakan *public read/write* (khusus fase pengembangan)
 
 ---
@@ -139,14 +144,13 @@ Tabel utama:
 - [x] Scan QR presensi (kamera + manual NIS)
 - [x] CRUD data siswa & sekolah
 - [x] Riwayat presensi & statistik
-- [ ] Check-in / Check-out (dua sesi presensi)
+- [x] Check-in / Check-out (dua sesi presensi)
 - [ ] Autentikasi & manajemen peran (admin / siswa)
-- [ ] Generate kartu QR per siswa (unduh / cetak)
+- [x] Generate kartu QR per siswa (unduh / cetak)
 - [ ] Laporan presensi bulanan (export)
 
 ---
 
----
 ## 📄 Lisensi
 
 Hak cipta © 2026 **AbsensiMagang**. Proyek ini untuk keperluan internal pengembangan aplikasi presensi magang.

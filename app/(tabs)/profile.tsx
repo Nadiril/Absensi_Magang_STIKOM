@@ -190,6 +190,18 @@ export default function ProfileScreen() {
           <TouchableOpacity
             style={styles.menuItem}
             activeOpacity={0.7}
+            onPress={() => router.push('/pengaturan')}
+          >
+            <View style={[styles.menuIconBg, { backgroundColor: Colors.primaryContainer }]}>
+              <Ionicons name="time-outline" size={20} color={Colors.onPrimaryContainer} />
+            </View>
+            <Text style={styles.menuText}>Pengaturan Presensi</Text>
+            <Ionicons name="chevron-forward" size={18} color={Colors.outline} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            activeOpacity={0.7}
             onPress={handleMenuPress}
           >
             <View style={[styles.menuIconBg, { backgroundColor: Colors.tertiaryContainer }]}>

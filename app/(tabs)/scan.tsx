@@ -32,10 +32,12 @@ export default function ScanScreen() {
     success: boolean;
     message: string;
     student?: Student;
+    type?: 'Check-In' | 'Check-Out';
   } | null>(null);
   const [successModal, setSuccessModal] = useState<{
     student: Student;
     time: string;
+    type: 'Check-In' | 'Check-Out';
   } | null>(null);
 
   useFocusEffect(
@@ -45,19 +47,20 @@ export default function ScanScreen() {
     }, [])
   );
 
-  const handleProcessScan = (inputNis: string) => {
+  const handleProcessScan = async (inputNis: string) => {
     if (!inputNis.trim()) {
       Alert.alert('Peringatan', 'Silakan masukkan NIS atau ID siswa.');
       return;
     }
 
-    const res = recordAttendance(inputNis);
+    const res = await recordAttendance(inputNis);
     setLastScanResult(res);
     if (res.success) {
       setManualNis('');
       setSuccessModal({
         student: res.student!,
         time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+        type: res.type ?? 'Check-In',
       });
     }
   };
@@ -216,10 +219,20 @@ export default function ScanScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <View style={styles.modalCheckCircle}>
-              <Ionicons name="checkmark" size={40} color="#ffffff" />
+              <Ionicons
+                name={successModal?.type === 'Check-Out' ? 'log-out' : 'log-in'}
+                size={36}
+                color="#ffffff"
+              />
             </View>
-            <Text style={styles.modalTitle}>Presensi Berhasil!</Text>
-            <Text style={styles.modalSubtitle}>Data kehadiran siswa berhasil dicatat</Text>
+            <Text style={styles.modalTitle}>
+              {successModal?.type === 'Check-Out' ? 'Presensi Pulang Berhasil!' : 'Presensi Hadir Berhasil!'}
+            </Text>
+            <Text style={styles.modalSubtitle}>
+              {successModal?.type === 'Check-Out'
+                ? 'Check-out siswa berhasil dicatat'
+                : 'Check-in siswa berhasil dicatat'}
+            </Text>
 
             {successModal ? (
               <View style={styles.modalStudentCard}>
@@ -244,9 +257,15 @@ export default function ScanScreen() {
             <View style={styles.modalTimeRow}>
               <Ionicons name="time-outline" size={16} color={Colors.secondary} />
               <Text style={styles.modalTimeText}>
-                {successModal ? `Absen pada pukul ${successModal.time}` : ''}
+                {successModal
+                  ? `${successModal.type === 'Check-Out' ? 'Pulang' : 'Hadir'} pada pukul ${successModal.time}`
+                  : ''}
               </Text>
             </View>
+
+            {successModal?.type === 'Check-In' ? (
+              <Text style={styles.modalHint}>Jangan lupa scan lagi saat siswa pulang.</Text>
+            ) : null}
 
             <TouchableOpacity
               style={styles.modalButton}
@@ -571,6 +590,12 @@ const createStyles = (Colors: ThemeColors) =>
     fontSize: 13,
     fontWeight: '600',
     color: Colors.secondary,
+  },
+  modalHint: {
+    fontSize: 12,
+    color: Colors.secondary,
+    marginBottom: 16,
+    textAlign: 'center',
   },
   modalButton: {
     width: '100%',

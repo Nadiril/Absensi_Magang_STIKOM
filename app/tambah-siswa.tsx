@@ -7,15 +7,33 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
+  Platform,
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { Shadows, ThemeColors } from '../constants/theme';
 import { useApp } from '../context/AppContext';
 import { useTheme } from '../context/ThemeContext';
 import { Toast, ToastData } from '../components/Toast';
+
+const toDateStr = (d: Date): string => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
+const formatDateDisplay = (iso?: string): string =>
+  iso
+    ? new Date(`${iso}T00:00:00`).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+    : '';
 
 export default function TambahSiswaModal() {
   const router = useRouter();
@@ -33,6 +51,10 @@ export default function TambahSiswaModal() {
   const [domisili, setDomisili] = useState('');
   const [studentPhone, setStudentPhone] = useState('');
   const [guardianPhone, setGuardianPhone] = useState('');
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
 
   const [toast, setToast] = useState<ToastData | null>(null);
   const backTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -47,6 +69,10 @@ export default function TambahSiswaModal() {
       setDomisili(editingStudent.domisili || '');
       setStudentPhone(editingStudent.studentPhone || '');
       setGuardianPhone(editingStudent.guardianPhone || '');
+      setStartDate(
+        editingStudent.startDate ? new Date(`${editingStudent.startDate}T00:00:00`) : null
+      );
+      setEndDate(editingStudent.endDate ? new Date(`${editingStudent.endDate}T00:00:00`) : null);
     }
   }, [isEdit, editingStudent, schools]);
 
@@ -73,6 +99,16 @@ export default function TambahSiswaModal() {
       return;
     }
 
+    if (!startDate || !endDate) {
+      setToast({ type: 'error', message: 'Mohon isi Tanggal Mulai & Selesai Magang.' });
+      return;
+    }
+
+    if (toDateStr(endDate) < toDateStr(startDate)) {
+      setToast({ type: 'error', message: 'Tanggal Selesai tidak boleh sebelum Tanggal Mulai.' });
+      return;
+    }
+
     try {
       const payload = {
         nis: nis.trim(),
@@ -82,6 +118,8 @@ export default function TambahSiswaModal() {
         domisili: domisili.trim(),
         studentPhone: studentPhone.trim(),
         guardianPhone: guardianPhone.trim(),
+        startDate: toDateStr(startDate),
+        endDate: toDateStr(endDate),
         attendanceRate: isEdit && editingStudent ? editingStudent.attendanceRate : 100,
         status: isEdit && editingStudent ? editingStudent.status : ('Aktif' as const),
         avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1a56db&color=fff`,
@@ -166,6 +204,72 @@ export default function TambahSiswaModal() {
             </Text>
             <Ionicons name="chevron-down" size={18} color={Colors.outline} />
           </TouchableOpacity>
+        </View>
+
+        {/* 3b. Tanggal Mulai Magang */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Tanggal Mulai Magang *</Text>
+          <TouchableOpacity
+            style={styles.dropdownTrigger}
+            activeOpacity={0.8}
+            onPress={() => setShowStartPicker(true)}
+          >
+            <Ionicons name="calendar-outline" size={20} color={Colors.outline} />
+            <Text
+              style={[
+                styles.dropdownTriggerText,
+                !startDate && { color: Colors.outline },
+              ]}
+              numberOfLines={1}
+            >
+              {startDate ? formatDateDisplay(toDateStr(startDate)) : 'Pilih tanggal mulai magang...'}
+            </Text>
+            <Ionicons name="chevron-down" size={18} color={Colors.outline} />
+          </TouchableOpacity>
+          {showStartPicker ? (
+            <DateTimePicker
+              value={startDate || new Date()}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={(event, selected) => {
+                if (Platform.OS === 'android') setShowStartPicker(false);
+                if (event.type === 'set' && selected) setStartDate(selected);
+              }}
+            />
+          ) : null}
+        </View>
+
+        {/* 3c. Tanggal Selesai Magang */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Tanggal Selesai Magang *</Text>
+          <TouchableOpacity
+            style={styles.dropdownTrigger}
+            activeOpacity={0.8}
+            onPress={() => setShowEndPicker(true)}
+          >
+            <Ionicons name="calendar-outline" size={20} color={Colors.outline} />
+            <Text
+              style={[
+                styles.dropdownTriggerText,
+                !endDate && { color: Colors.outline },
+              ]}
+              numberOfLines={1}
+            >
+              {endDate ? formatDateDisplay(toDateStr(endDate)) : 'Pilih tanggal selesai magang...'}
+            </Text>
+            <Ionicons name="chevron-down" size={18} color={Colors.outline} />
+          </TouchableOpacity>
+          {showEndPicker ? (
+            <DateTimePicker
+              value={endDate || startDate || new Date()}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={(event, selected) => {
+                if (Platform.OS === 'android') setShowEndPicker(false);
+                if (event.type === 'set' && selected) setEndDate(selected);
+              }}
+            />
+          ) : null}
         </View>
 
         {/* 4. Domisili Siswa */}

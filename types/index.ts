@@ -4,11 +4,12 @@ export interface Student {
   nis: string;
   schoolId: string;
   schoolName: string;
-  classGrade?: string;
   email?: string;
   domisili?: string;
   studentPhone?: string;
   guardianPhone?: string;
+  startDate?: string; // YYYY-MM-DD
+  endDate?: string; // YYYY-MM-DD
   attendanceRate: number; // e.g. 96
   status: 'Aktif' | 'Izin' | 'Sakit' | 'Alpha';
   avatarUrl?: string;
@@ -30,9 +31,14 @@ export interface AttendanceRecord {
   studentName: string;
   schoolName: string;
   nis: string;
+  date: string; // YYYY-MM-DD
   timestamp: string;
   type: 'Check-In' | 'Check-Out';
   status: 'Hadir' | 'Terlambat';
+}
+
+export interface AttendanceSettings {
+  checkInLimit: string; // HH:MM
 }
 
 export interface ActivityLog {

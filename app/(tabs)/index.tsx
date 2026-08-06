@@ -41,9 +41,15 @@ export default function DashboardScreen() {
     []
   );
 
+  const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const attendedCount = useMemo(
-    () => new Set(attendanceRecords.map((r) => r.studentId)).size,
-    [attendanceRecords]
+    () =>
+      new Set(
+        attendanceRecords
+          .filter((r) => r.type === 'Check-In' && r.date === todayStr)
+          .map((r) => r.studentId)
+      ).size,
+    [attendanceRecords, todayStr]
   );
   const notPresentCount = Math.max(0, students.length - attendedCount);
 
@@ -52,11 +58,33 @@ export default function DashboardScreen() {
     return Math.round((attendedCount / students.length) * 100);
   }, [attendedCount, students.length]);
 
-  const totalCheckIns = useMemo(() => attendanceRecords.length, [attendanceRecords]);
+  const totalCheckIns = useMemo(
+    () => attendanceRecords.filter((r) => r.type === 'Check-In').length,
+    [attendanceRecords]
+  );
   const lateCount = useMemo(
     () => attendanceRecords.filter((r) => r.status === 'Terlambat').length,
     [attendanceRecords]
   );
+  const checkedInTodayCount = useMemo(
+    () =>
+      new Set(
+        attendanceRecords
+          .filter((r) => r.type === 'Check-In' && r.date === todayStr)
+          .map((r) => r.studentId)
+      ).size,
+    [attendanceRecords, todayStr]
+  );
+  const checkedOutTodayCount = useMemo(
+    () =>
+      new Set(
+        attendanceRecords
+          .filter((r) => r.type === 'Check-Out' && r.date === todayStr)
+          .map((r) => r.studentId)
+      ).size,
+    [attendanceRecords, todayStr]
+  );
+  const notOutCount = Math.max(0, checkedInTodayCount - checkedOutTodayCount);
   const activeStudents = useMemo(
     () => students.filter((s) => s.status === 'Aktif').length,
     [students]
@@ -224,6 +252,26 @@ export default function DashboardScreen() {
             <View style={styles.statsMiniTextGroup}>
               <Text style={styles.statsMiniValue}>{inactiveStudents}</Text>
               <Text style={styles.statsMiniLabel}>Tidak Aktif</Text>
+            </View>
+          </View>
+
+          <View style={styles.statsMiniCard}>
+            <View style={[styles.statsMiniIcon, { backgroundColor: Colors.successContainer }]}>
+              <Ionicons name="log-out-outline" size={20} color={Colors.onSuccessContainer} />
+            </View>
+            <View style={styles.statsMiniTextGroup}>
+              <Text style={styles.statsMiniValue}>{checkedOutTodayCount}</Text>
+              <Text style={styles.statsMiniLabel}>Sudah Pulang</Text>
+            </View>
+          </View>
+
+          <View style={styles.statsMiniCard}>
+            <View style={[styles.statsMiniIcon, { backgroundColor: Colors.tertiaryContainer }]}>
+              <Ionicons name="time-outline" size={20} color={Colors.onTertiaryContainer} />
+            </View>
+            <View style={styles.statsMiniTextGroup}>
+              <Text style={styles.statsMiniValue}>{notOutCount}</Text>
+              <Text style={styles.statsMiniLabel}>Belum Pulang</Text>
             </View>
           </View>
         </View>

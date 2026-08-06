@@ -398,7 +398,7 @@ export default function LoginScreen() {
               <AuthField
                 label="Email"
                 icon="mail-outline"
-                placeholder="nama@sekolah.ac.id"
+                placeholder="Masukkan Email Anda"
                 value={email}
                 onChangeText={(t) => {
                   setEmail(t);
@@ -420,7 +420,7 @@ export default function LoginScreen() {
               <AuthField
                 label="Kata Sandi"
                 icon="lock-closed-outline"
-                placeholder="Minimal 6 karakter"
+                placeholder="Masukkan Kata Sandi Anda"
                 value={password}
                 onChangeText={(t) => {
                   setPassword(t);
