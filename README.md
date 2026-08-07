@@ -145,8 +145,8 @@ Tabel utama:
 - [x] CRUD data siswa & sekolah
 - [x] Riwayat presensi & statistik
 - [x] Check-in / Check-out (dua sesi presensi)
+ - [x] Generate kartu QR per siswa (unduh / cetak)
 - [ ] Autentikasi & manajemen peran (admin / siswa)
-- [x] Generate kartu QR per siswa (unduh / cetak)
 - [ ] Laporan presensi bulanan (export)
 
 ---
