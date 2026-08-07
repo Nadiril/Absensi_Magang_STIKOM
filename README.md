@@ -131,8 +131,8 @@ Jalankan `sql/setup_lengkap.sql` di **Supabase Dashboard → SQL Editor**.
 
 Tabel utama:
 
-- **`schools`** — data sekolah mitra (nama, NPSN, alamat, email, telepon, status)
-- **`students`** — data siswa (NIS, nama, relasi ke sekolah, domisili, kontak, status) + periode magang (`start_date`/`end_date`)
+- **`schools`** — data sekolah mitra (nama,alamat,telepon)
+- **`students`** — data siswa (NIS, nama, relasi ke sekolah, domisili, kontak) + periode magang (`start_date`/`end_date`)
 - **`attendance_records`** — rekam presensi masuk/pulang (tanggal, jam, tipe `Check-In`/`Check-Out`, status `Hadir`/`Terlambat`)
 - **`app_settings`** — pengaturan key-value (mis. jam batas check-in `check_in_limit`, default `08:00`)
 - RLS aktif dengan kebijakan *public read/write* (khusus fase pengembangan)
@@ -153,4 +153,4 @@ Tabel utama:
 
 ## 📄 Lisensi
 
-Hak cipta © 2026 **AbsensiMagang**. Proyek ini untuk keperluan internal pengembangan aplikasi presensi magang.
+Hak cipta © 2026 **AbsensiMagang**.
