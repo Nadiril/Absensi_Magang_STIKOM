@@ -1,28 +1,20 @@
 import React from 'react';
-import { Stack, Redirect, usePathname } from 'expo-router';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AppProvider, useApp } from '../context/AppContext';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 
 function RootNavigator() {
   const { Colors, isDark } = useTheme();
-  const { isLoggedIn, isAuthReady } = useApp();
-  const pathname = usePathname();
+  const { isAuthReady } = useApp();
 
   if (!isAuthReady) return null;
-
-  const showRedirect =
-    isLoggedIn && pathname === '/login'
-      ? <Redirect href="/(tabs)" />
-      : !isLoggedIn && pathname !== '/login'
-        ? <Redirect href="/login" />
-        : null;
 
   return (
     <>
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      {showRedirect}
       <Stack
+        initialRouteName="(tabs)"
         screenOptions={{
           headerStyle: {
             backgroundColor: Colors.surface,
@@ -37,8 +29,6 @@ function RootNavigator() {
           },
         }}
       >
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="auth-loading" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="tambah-siswa"

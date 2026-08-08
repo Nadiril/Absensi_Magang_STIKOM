@@ -16,7 +16,7 @@ import { useTheme } from '../../context/ThemeContext';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { students, schools, clearAllData, logout } = useApp();
+  const { students, schools, clearAllData } = useApp();
   const { Colors, mode: themeMode, setMode: setThemeMode } = useTheme();
   const styles = useMemo(() => createStyles(Colors), [Colors]);
 
@@ -45,25 +45,6 @@ export default function ProfileScreen() {
         },
       ]
     );
-  };
-
-  const handleLogout = () => {
-    Alert.alert('Konfirmasi Keluar', 'Apakah Anda yakin ingin keluar dari akun Admin?', [
-      { text: 'Batal', style: 'cancel' },
-      {
-        text: 'Keluar',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await logout();
-            router.replace('/login');
-          } catch (err) {
-            console.error('Gagal keluar dari akun:', err);
-            Alert.alert('Gagal', 'Terjadi kesalahan saat keluar. Silakan coba lagi.');
-          }
-        },
-      },
-    ]);
   };
 
   return (
@@ -235,12 +216,6 @@ export default function ProfileScreen() {
             <Ionicons name="chevron-forward" size={18} color={Colors.onErrorContainer} />
           </TouchableOpacity>
         </View>
-
-        {/* Logout Button */}
-        <TouchableOpacity style={styles.logoutButton} activeOpacity={0.8} onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={20} color={Colors.error} />
-          <Text style={styles.logoutText}>Keluar Akun</Text>
-        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -386,23 +361,6 @@ const createStyles = (Colors: ThemeColors) =>
     fontWeight: '600',
     color: Colors.onSurface,
     letterSpacing: -0.1,
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 52,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.errorContainer,
-    backgroundColor: Colors.errorContainer,
-    gap: 8,
-    marginTop: 8,
-  },
-  logoutText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: Colors.onErrorContainer,
   },
   themeOptionsRow: {
     flexDirection: 'row',

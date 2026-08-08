@@ -11,7 +11,7 @@ export interface Student {
   startDate?: string; // YYYY-MM-DD
   endDate?: string; // YYYY-MM-DD
   attendanceRate: number; // e.g. 96
-  status: 'Aktif' | 'Izin' | 'Sakit' | 'Alpha';
+  status: 'Aktif' | 'Tidak Aktif';
   avatarUrl?: string;
 }
 

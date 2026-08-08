@@ -29,6 +29,14 @@ const formatLongDate = (iso?: string): string =>
       })
     : '';
 
+const formatHistoryDate = (iso: string): string =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString('id-ID', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+
 export default function StudentDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -144,9 +152,12 @@ export default function StudentDetailScreen() {
           <Text style={styles.studentNis}>NIS: {student.nis}</Text>
           
           <View style={styles.badgeRow}>
-            <View style={styles.rateBadge}>
-              <Text style={styles.rateText}>{student.attendanceRate}% Kehadiran</Text>
-            </View>
+            {student.status !== 'Aktif' ? (
+              <View style={styles.statusBadge}>
+                <Ionicons name="close-circle-outline" size={13} color={Colors.onErrorContainer} />
+                <Text style={styles.statusBadgeText}>Tidak Aktif</Text>
+              </View>
+            ) : null}
           </View>
         </View>
 
@@ -193,7 +204,10 @@ export default function StudentDetailScreen() {
           <Text style={styles.qrSubtitle}>Tunjukkan QR Code ini ke kamera presensi saat masuk/pulang</Text>
           
           <ViewShot ref={qrShotRef} options={{ format: 'png', quality: 1 }} style={styles.qrBox}>
-            <QRCode value={student.nis} size={160} quietZone={8} />
+            <Text style={styles.qrNameText} numberOfLines={1}>
+              {student.name}
+            </Text>
+            <QRCode value={`${student.name}|${student.nis}`} size={160} quietZone={8} />
             <Text style={styles.qrNisText}>NIS: {student.nis}</Text>
           </ViewShot>
 
@@ -277,7 +291,9 @@ export default function StudentDetailScreen() {
                 <Ionicons name="checkmark-circle" size={22} color={Colors.tertiary} />
                 <View style={styles.historyTextGroup}>
                   <Text style={styles.historyType}>{rec.type} - {rec.status}</Text>
-                  <Text style={styles.historyTime}>{rec.timestamp}</Text>
+                  <Text style={styles.historyTime}>
+                    {formatHistoryDate(rec.date)} • {rec.timestamp}
+                  </Text>
                 </View>
               </View>
             ))
@@ -389,16 +405,19 @@ const createStyles = (Colors: ThemeColors) =>
     flexDirection: 'row',
     gap: 8,
   },
-  rateBadge: {
-    backgroundColor: Colors.primaryContainer,
-    paddingHorizontal: 12,
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: Colors.errorContainer,
+    paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 14,
   },
-  rateText: {
+  statusBadgeText: {
     fontSize: 12,
     fontWeight: '600',
-    color: Colors.onPrimaryContainer,
+    color: Colors.onErrorContainer,
   },
   sessionCard: {
     backgroundColor: Colors.surfaceContainerLowest,
@@ -480,8 +499,16 @@ const createStyles = (Colors: ThemeColors) =>
   qrNisText: {
     fontSize: 14,
     fontWeight: '700',
-    color: Colors.onSurface,
+    color: '#0f172a',
     marginTop: 10,
+  },
+  qrNameText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0f172a',
+    marginBottom: 14,
+    maxWidth: 220,
+    textAlign: 'center',
   },
   exportBtn: {
     flexDirection: 'row',

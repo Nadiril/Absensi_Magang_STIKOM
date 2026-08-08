@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { useAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { Shadows, ThemeColors } from '../../constants/theme';
@@ -24,6 +25,15 @@ export default function ScanScreen() {
   const { Colors } = useTheme();
   const styles = useMemo(() => createStyles(Colors), [Colors]);
   const [permission, requestPermission] = useCameraPermissions();
+  const successSound = useAudioPlayer(require('../../assets/sounds/scan-success.wav'));
+
+  React.useEffect(() => {
+    successSound.volume = 1.0;
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      interruptionMode: 'mixWithOthers',
+    }).catch(() => {});
+  }, [successSound]);
   const [isFocused, setIsFocused] = useState(true);
   const [manualNis, setManualNis] = useState('');
   const [flashOn, setFlashOn] = useState(false);
@@ -56,6 +66,8 @@ export default function ScanScreen() {
     const res = await recordAttendance(inputNis);
     setLastScanResult(res);
     if (res.success) {
+      successSound.seekTo(0);
+      successSound.play();
       setManualNis('');
       setSuccessModal({
         student: res.student!,

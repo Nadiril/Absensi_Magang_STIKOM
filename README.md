@@ -2,7 +2,7 @@
 
 Aplikasi **presensi siswa magang berbasis QR Code** yang dibangun dengan Expo (React Native). Siswa menampilkan kartu QR, admin memindai QR tersebut untuk mencatat kehadiran, serta mengelola data siswa dan sekolah mitra secara lengkap (CRUD).
 
-> ⚠️ **Status: Pengembangan Awal (v1.4.2)** — Fitur masih terus dikembangkan dan disempurnakan.
+> ⚠️ **Status: Pengembangan Awal (v1.5.0)** — Fitur masih terus dikembangkan dan disempurnakan.
 
 ---
 
@@ -10,13 +10,14 @@ Aplikasi **presensi siswa magang berbasis QR Code** yang dibangun dengan Expo (R
 
 | Modul | Keterangan |
 | --- | --- |
-| 📷 **Absensi QR Code** | Scan QR siswa langsung dari kamera (berbasis `expo-camera`), dengan flash & lock antar-scan |
+| 📷 **Absensi QR Code** | Scan QR siswa langsung dari kamera (berbasis `expo-camera`), dengan flash & lock antar-scan; **suara "ding" saat presensi berhasil** (`expo-audio`) |
 | ⌨️ **Input NIS Manual** | Cadangan presensi manual jika QR rusak / tidak terbaca |
 | 🎉 **Modal Sukses Presensi** | Konfirmasi visual setelah scan berhasil (nama, NIS, sekolah, jam) |
-| 👨‍🎓 **Data Siswa (CRUD)** | Tambah, lihat detail + kartu QR, **edit**, hapus, pencarian & filter sekolah |
+| 👨‍🎓 **Data Siswa (CRUD)** | Tambah, lihat detail + kartu QR, **edit** (termasuk status Aktif/Tidak Aktif), hapus, pencarian & filter sekolah |
 | 🏫 **Data Sekolah (CRUD)** | Tambah, **edit**, hapus, pencarian, status sekolah mitra |
-| 📊 **Beranda / Dashboard** | Statistik persentase kehadiran, grid ringkasan (total presensi, terlambat, siswa aktif), aktivitas terbaru |
-| 🕐 **Riwayat Presensi** | Riwayat kehadiran per siswa |
+| 📊 **Beranda / Dashboard** | Statistik persentase kehadiran (berbasis **siswa aktif**), grid ringkasan (total presensi, terlambat, siswa aktif/tidak aktif), aktivitas terbaru |
+| 🕐 **Riwayat Presensi** | Riwayat per siswa menampilkan **tanggal & jam** setiap entri |
+| 🆔 **Status Siswa** | Status `Aktif` / `Tidak Aktif` dikelola admin; siswa Tidak Aktif **ditolak saat scan** & tidak ikut penyebut statistik kehadiran |
 | 🔁 **Check-in / Check-out** | Dua sesi otomatis (masuk & pulang), status Hadir/Terlambat per batas jam, badge sesi hari ini |
 | ⚙️ **Pengaturan Presensi** | Atur jam batas check-in dari menu Profil |
 | 🔔 **Notifikasi Toast** | Feedback sukses / gagal pada semua aksi simpan & hapus |
@@ -35,6 +36,7 @@ Aplikasi **presensi siswa magang berbasis QR Code** yang dibangun dengan Expo (R
 | Supabase (JS Client) | `^2.112.0` | ![Supabase](https://img.shields.io/badge/Supabase-2.112.0-3ECF8E?logo=supabase&logoColor=white) |
 | expo-router | `~6.0.24` | ![expo-router](https://img.shields.io/badge/expo--router-6.0.24-FFFFFF) |
 | expo-camera | `~17.0.10` | ![expo-camera](https://img.shields.io/badge/expo--camera-17.0.10-FFFFFF) |
+| expo-audio | `~1.1.1` | ![expo-audio](https://img.shields.io/badge/expo--audio-1.1.1-FFFFFF) |
 | React Native Safe Area Context | `~5.6.0` | ![safe-area](https://img.shields.io/badge/safe--area--context-5.6.0-FFFFFF) |
 | AsyncStorage | `2.2.0` | ![async-storage](https://img.shields.io/badge/AsyncStorage-2.2.0-FFFFFF) |
 | React Native Reanimated | `~4.1.1` | ![reanimated](https://img.shields.io/badge/Reanimated-4.1.1-FFFFFF) |
@@ -68,6 +70,7 @@ AbsensiMagang/
 ├── services/               # Integrasi Supabase (student & school service)
 ├── lib/                    # Konfigurasi client Supabase
 ├── types/                  # Definisi tipe TypeScript
+├── assets/sounds/          # Aset suara (feedback scan)
 ├── sql/                    # Skema & query database Supabase
 └── app.json                # Konfigurasi aplikasi Expo
 ```

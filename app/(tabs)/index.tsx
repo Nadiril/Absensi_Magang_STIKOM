@@ -42,6 +42,14 @@ export default function DashboardScreen() {
   );
 
   const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  const activeStudents = useMemo(
+    () => students.filter((s) => s.status === 'Aktif').length,
+    [students]
+  );
+  const inactiveStudents = useMemo(
+    () => students.filter((s) => s.status !== 'Aktif').length,
+    [students]
+  );
   const attendedCount = useMemo(
     () =>
       new Set(
@@ -51,12 +59,12 @@ export default function DashboardScreen() {
       ).size,
     [attendanceRecords, todayStr]
   );
-  const notPresentCount = Math.max(0, students.length - attendedCount);
+  const notPresentCount = Math.max(0, activeStudents - attendedCount);
 
   const attendancePercent = useMemo(() => {
-    if (students.length === 0) return 0;
-    return Math.round((attendedCount / students.length) * 100);
-  }, [attendedCount, students.length]);
+    if (activeStudents === 0) return 0;
+    return Math.round((attendedCount / activeStudents) * 100);
+  }, [attendedCount, activeStudents]);
 
   const totalCheckIns = useMemo(
     () => attendanceRecords.filter((r) => r.type === 'Check-In').length,
@@ -85,14 +93,6 @@ export default function DashboardScreen() {
     [attendanceRecords, todayStr]
   );
   const notOutCount = Math.max(0, checkedInTodayCount - checkedOutTodayCount);
-  const activeStudents = useMemo(
-    () => students.filter((s) => s.status === 'Aktif').length,
-    [students]
-  );
-  const inactiveStudents = useMemo(
-    () => students.filter((s) => s.status !== 'Aktif').length,
-    [students]
-  );
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
@@ -210,7 +210,7 @@ export default function DashboardScreen() {
             />
           </View>
           <Text style={styles.attendanceHint}>
-            {attendedCount} dari {students.length} siswa hadir hari ini
+            {attendedCount} dari {activeStudents} siswa aktif hadir hari ini
           </Text>
         </View>
 

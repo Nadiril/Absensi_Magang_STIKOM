@@ -55,3 +55,13 @@
 - 📅 **Periode Magang** — form siswa kini wajib mengisi **Tanggal Mulai** & **Tanggal Selesai Magang** (`DateTimePicker`; prefill saat edit; validasi selesai ≥ mulai), disimpan di kolom baru `start_date`/`end_date` (DATE) dan ditampilkan sebagai "Periode Magang" di halaman detail siswa
 - 🗃️ **SQL diperbarui** — `sql/setup_lengkap.sql` memuat kolom periode magang di `CREATE TABLE students` + blok migrasi aman (`ALTER TABLE ... ADD COLUMN IF NOT EXISTS`); contoh seed ikut diperbarui
 - 🐛 **Perbaikan aktivitas beranda** — feed "Aktivitas Terbaru" kini dibangun ulang otomatis dari `attendance_records` (tidak lagi hilang setelah aplikasi di-restart); tanpa tabel baru
+
+### v1.5.0 — 8 Agustus 2026
+
+- 🔖 **Status siswa Aktif / Tidak Aktif** — pilihan baru di form tambah/edit siswa; siswa `Tidak Aktif` **ditolak saat scan** QR/NIS (ada pesan peringatan), badge status tampil di daftar & detail siswa, dan tidak ikut sebagai penyebut persentase kehadiran (statistik berbasis siswa aktif saja; TOTAL SISWA tetap semua)
+- 🧹 **Badge "% Kehadiran" dihapus** dari halaman detail siswa (UI saja; field `attendance_rate` tetap tersimpan)
+- 🔳 **Kartu QR informatif** — QR kini berisi `Nama|NIS` (bukan NIS saja) + nama siswa ditampilkan di kartu agar mudah dicetak/dikenali; scanner tetap kompatibel dengan kartu lama berisi NIS saja dan input manual
+- 🕐 **Riwayat Presensi lengkap** — setiap entri menampilkan **tanggal + jam** (mis. `Sab, 08 Agu 2026 • 07:58`)
+- ⚖️ **Konsistensi kartu** — nomor HP siswa pada kartu daftar dirata kiri agar seragam dengan kartu sekolah
+- 🔊 **Suara keberhasilan scan** — bunyi "ding" singkat saat presensi berhasil (scan QR & input NIS manual) lewat `expo-audio`; audio mode disetel `playsInSilentMode` + `mixWithOthers` (tidak mengganggu musik/audio lain)
+- ➕ **Dependensi baru** — `expo-audio ~1.1.1` (config plugin terpasang di `app.json`)

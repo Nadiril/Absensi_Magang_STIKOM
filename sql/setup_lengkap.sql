@@ -20,7 +20,6 @@ DROP TABLE IF EXISTS schools CASCADE;
 CREATE TABLE schools (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
-  npsn TEXT,
   address TEXT NOT NULL DEFAULT '',
   phone TEXT NOT NULL DEFAULT '',
   status TEXT NOT NULL DEFAULT 'Aktif',
@@ -35,7 +34,6 @@ CREATE TABLE students (
   name TEXT NOT NULL,
   nis TEXT NOT NULL,
   school_id UUID NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
-  class_grade TEXT,
   email TEXT,
   domisili TEXT,
   student_phone TEXT,
@@ -78,6 +76,10 @@ CREATE TABLE app_settings (
 ALTER TABLE students ADD COLUMN IF NOT EXISTS start_date DATE;
 ALTER TABLE students ADD COLUMN IF NOT EXISTS end_date DATE;
 
+-- Hapus kolom yang tidak terpakai (aman dijalankan berulang)
+ALTER TABLE students DROP COLUMN IF EXISTS class_grade;
+ALTER TABLE schools  DROP COLUMN IF EXISTS npsn;
+
 -- ============================================================
 -- 4. INDEX
 -- ============================================================
@@ -109,8 +111,8 @@ CREATE POLICY "public crud app_settings" ON app_settings FOR ALL TO anon, authen
 -- ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW();
 
 -- -- Contoh sekolah & siswa
--- INSERT INTO schools (name, npsn, address, phone, status) VALUES
--- ('SMK Negeri 1 Contoh', '12345678', 'Jl. Merdeka No. 1', '021123456', 'Aktif');
+-- INSERT INTO schools (name, address, phone, status) VALUES
+-- ('SMK Negeri 1 Contoh', 'Jl. Merdeka No. 1', '021123456', 'Aktif');
 
 -- INSERT INTO students (name, nis, school_id, start_date, end_date, status)
 -- SELECT 'Budi Santoso', '2024001', id, '2026-08-03', '2026-11-27', 'Aktif' FROM schools WHERE name = 'SMK Negeri 1 Contoh';

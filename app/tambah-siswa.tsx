@@ -51,6 +51,7 @@ export default function TambahSiswaModal() {
   const [domisili, setDomisili] = useState('');
   const [studentPhone, setStudentPhone] = useState('');
   const [guardianPhone, setGuardianPhone] = useState('');
+  const [status, setStatus] = useState<'Aktif' | 'Tidak Aktif'>('Aktif');
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [showStartPicker, setShowStartPicker] = useState(false);
@@ -69,6 +70,7 @@ export default function TambahSiswaModal() {
       setDomisili(editingStudent.domisili || '');
       setStudentPhone(editingStudent.studentPhone || '');
       setGuardianPhone(editingStudent.guardianPhone || '');
+      setStatus(editingStudent.status || 'Aktif');
       setStartDate(
         editingStudent.startDate ? new Date(`${editingStudent.startDate}T00:00:00`) : null
       );
@@ -121,7 +123,7 @@ export default function TambahSiswaModal() {
         startDate: toDateStr(startDate),
         endDate: toDateStr(endDate),
         attendanceRate: isEdit && editingStudent ? editingStudent.attendanceRate : 100,
-        status: isEdit && editingStudent ? editingStudent.status : ('Aktif' as const),
+        status,
         avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1a56db&color=fff`,
       };
 
@@ -321,6 +323,40 @@ export default function TambahSiswaModal() {
           </View>
         </View>
 
+        {/* 7. Status Siswa */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Status Siswa</Text>
+          <View style={styles.statusRow}>
+            {(['Aktif', 'Tidak Aktif'] as const).map((opt) => {
+              const active = status === opt;
+              return (
+                <TouchableOpacity
+                  key={opt}
+                  style={[styles.statusOption, active && styles.statusOptionActive]}
+                  activeOpacity={0.7}
+                  onPress={() => setStatus(opt)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                >
+                  <Ionicons
+                    name={opt === 'Aktif' ? 'checkmark-circle' : 'close-circle-outline'}
+                    size={18}
+                    color={active ? Colors.onPrimaryContainer : Colors.secondary}
+                  />
+                  <Text
+                    style={[styles.statusOptionText, active && styles.statusOptionTextActive]}
+                  >
+                    {opt}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          <Text style={styles.statusHint}>
+            Siswa dengan status Tidak Aktif tidak dapat melakukan presensi.
+          </Text>
+        </View>
+
         {/* Action Buttons */}
         <View style={styles.actionRow}>
           <TouchableOpacity
@@ -493,6 +529,40 @@ const createStyles = (Colors: ThemeColors) =>
     fontSize: 14,
     color: Colors.onSurface,
     marginLeft: 10,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  statusOption: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    height: 52,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant,
+    backgroundColor: Colors.surfaceContainerLowest,
+  },
+  statusOptionActive: {
+    backgroundColor: Colors.primaryContainer,
+    borderColor: Colors.primaryContainer,
+  },
+  statusOptionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.secondary,
+  },
+  statusOptionTextActive: {
+    color: Colors.onPrimaryContainer,
+  },
+  statusHint: {
+    fontSize: 11,
+    color: Colors.secondary,
+    marginTop: 6,
+    marginLeft: 4,
   },
   actionRow: {
     flexDirection: 'row',

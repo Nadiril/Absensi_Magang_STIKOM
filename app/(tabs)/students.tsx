@@ -43,7 +43,16 @@ const StudentRow = memo(function StudentRow({
           )}
 
           <View style={styles.studentInfo}>
-            <Text style={styles.studentName}>{item.name || 'Tanpa Nama'}</Text>
+            <View style={styles.nameRow}>
+              <Text style={styles.studentName} numberOfLines={1}>
+                {item.name || 'Tanpa Nama'}
+              </Text>
+              {item.status !== 'Aktif' ? (
+                <View style={styles.statusBadge}>
+                  <Text style={styles.statusBadgeText}>Tidak Aktif</Text>
+                </View>
+              ) : null}
+            </View>
             <Text style={styles.studentNis}>NIS: {item.nis || '-'}</Text>
             <Text style={styles.studentSchool}>{item.schoolName || 'Sekolah'}</Text>
           </View>
@@ -382,7 +391,24 @@ const createStudentRowStyles = (Colors: ThemeColors) =>
     studentInfo: {
       flex: 1,
     },
+    nameRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    statusBadge: {
+      backgroundColor: Colors.errorContainer,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 8,
+    },
+    statusBadgeText: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: Colors.onErrorContainer,
+    },
     studentName: {
+      flexShrink: 1,
       fontSize: 16,
       fontWeight: '700',
       color: Colors.onSurface,
@@ -400,7 +426,6 @@ const createStudentRowStyles = (Colors: ThemeColors) =>
     },
     cardFooter: {
       flexDirection: 'row',
-      justifyContent: 'flex-end',
       alignItems: 'center',
       gap: 4,
       marginTop: 12,

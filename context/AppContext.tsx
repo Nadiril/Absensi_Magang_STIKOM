@@ -364,14 +364,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const recordAttendance = useCallback(
     async (nisOrId: string) => {
+      const raw = nisOrId.trim();
+      const parts = raw.split('|');
+      const nisPart = (parts[parts.length - 1] || '').trim();
+      const namePart = parts.length > 1 ? parts[0].trim() : '';
       const target = students.find(
-        (s) => s.nis.toLowerCase() === nisOrId.trim().toLowerCase() || s.id === nisOrId.trim()
+        (s) =>
+          s.nis.toLowerCase() === nisPart.toLowerCase() ||
+          s.id === raw ||
+          (namePart && s.name.toLowerCase() === namePart.toLowerCase())
       );
 
       if (!target) {
         return {
           success: false,
           message: `Siswa dengan NIS/ID "${nisOrId}" tidak ditemukan.`,
+        };
+      }
+
+      if (target.status !== 'Aktif') {
+        return {
+          success: false,
+          message: `${target.name} berstatus Tidak Aktif. Presensi ditolak.`,
         };
       }
 
