@@ -64,4 +64,8 @@
 - 🕐 **Riwayat Presensi lengkap** — setiap entri menampilkan **tanggal + jam** (mis. `Sab, 08 Agu 2026 • 07:58`)
 - ⚖️ **Konsistensi kartu** — nomor HP siswa pada kartu daftar dirata kiri agar seragam dengan kartu sekolah
 - 🔊 **Suara keberhasilan scan** — bunyi "ding" singkat saat presensi berhasil (scan QR & input NIS manual) lewat `expo-audio`; audio mode disetel `playsInSilentMode` + `mixWithOthers` (tidak mengganggu musik/audio lain)
-- ➕ **Dependensi baru** — `expo-audio ~1.1.1` (config plugin terpasang di `app.json`)
+- ➕ **Dependensi baru** — `expo-audio ~1.1.1` (config plugin terpasang di `app.json`)### v1.5.1 - 8 Agustus 2026
+
+- Load data lebih cepat: fetch awal (sekolah + siswa + presensi + pengaturan) berjalan paralel dalam satu `Promise.all` (sebelumnya berurutan), mempercepat tampilan data saat aplikasi dibuka
+- Hemat penyimpanan saat online: penulisan AsyncStorage untuk attendance_records dilewati saat mode Supabase aktif (sebelumnya tetap menulis duplikat setiap scan)
+- List lebih responsif: renderItem list siswa & sekolah di-stabilkan dengan useCallback agar React.memo pada baris benar-benar bekerja saat kumpulan data berubah

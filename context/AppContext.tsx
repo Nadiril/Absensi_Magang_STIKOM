@@ -74,26 +74,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (configured) {
       try {
-        const [fetchedSchools, fetchedStudents] = await Promise.all([
-          schoolService.getSchools(),
-          studentService.getStudents(),
-        ]);
+        const [fetchedSchools, fetchedStudents, fetchedAttendance, fetchedSettings] =
+          await Promise.all([
+            schoolService.getSchools(),
+            studentService.getStudents(),
+            attendanceService.getAttendanceRecords(),
+            attendanceService.getSettings(),
+          ]);
         setSchools(fetchedSchools);
         setStudents(fetchedStudents);
-      } catch (err) {
-        console.error('Error fetching data from Supabase, fallback to AsyncStorage:', err);
-        await loadFromAsyncStorage();
-      }
-
-      try {
-        const fetchedAttendance = await attendanceService.getAttendanceRecords();
         setAttendanceRecords(fetchedAttendance);
-      } catch (err) {
-        console.error('Error fetching attendance records from Supabase:', err);
-      }
 
-      try {
-        const fetchedSettings = await attendanceService.getSettings();
         if (fetchedSettings) {
           setSettings(fetchedSettings);
         } else {
@@ -102,7 +93,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             .catch((err) => console.error('Failed to seed settings to Supabase:', err));
         }
       } catch (err) {
-        console.error('Error fetching settings from Supabase:', err);
+        console.error('Error fetching data from Supabase, fallback to AsyncStorage:', err);
+        await loadFromAsyncStorage();
       }
     } else {
       await loadFromAsyncStorage();
@@ -151,11 +143,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [schools, isSupabaseActive]);
 
   useEffect(() => {
+    if (isSupabaseActive) return;
     const t = setTimeout(() => {
       AsyncStorage.setItem('@magangku_attendance', JSON.stringify(attendanceRecords)).catch(() => {});
     }, 300);
     return () => clearTimeout(t);
-  }, [attendanceRecords]);
+  }, [attendanceRecords, isSupabaseActive]);
 
   const activities = useMemo<ActivityLog[]>(
     () => {

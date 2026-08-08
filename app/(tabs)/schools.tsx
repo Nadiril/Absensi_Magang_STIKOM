@@ -134,6 +134,13 @@ export default function SchoolsScreen() {
 
   const schoolKeyExtractor = useCallback((item: School, index: number) => item?.id || `sch-${index}`, []);
 
+  const renderSchoolRow = useCallback(
+    ({ item }: { item: School }) => (
+      <SchoolRow item={item} onOpen={openStudents} onDelete={handleDeleteSchool} />
+    ),
+    [openStudents, handleDeleteSchool]
+  );
+
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       {/* Search Bar Header */}
@@ -178,9 +185,7 @@ export default function SchoolsScreen() {
         <FlatList
           data={filteredSchools}
           keyExtractor={schoolKeyExtractor}
-          renderItem={({ item }) => (
-            <SchoolRow item={item} onOpen={openStudents} onDelete={handleDeleteSchool} />
-          )}
+          renderItem={renderSchoolRow}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           initialNumToRender={8}

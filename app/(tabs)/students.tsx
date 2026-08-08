@@ -117,6 +117,11 @@ export default function StudentsScreen() {
     [router]
   );
 
+  const renderStudentRow = useCallback(
+    ({ item }: { item: Student }) => <StudentRow item={item} onPress={openStudent} />,
+    [openStudent]
+  );
+
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       {/* Search & Filter Header */}
@@ -193,7 +198,7 @@ export default function StudentsScreen() {
         <FlatList
           data={filteredStudents}
           keyExtractor={studentKeyExtractor}
-          renderItem={({ item }) => <StudentRow item={item} onPress={openStudent} />}
+          renderItem={renderStudentRow}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           initialNumToRender={8}
